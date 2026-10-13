@@ -78,7 +78,9 @@ fn parse_http_url(candidate: &str) -> NavigationDecision {
 fn starts_with_scheme(input: &str, scheme: &str) -> bool {
     input.get(..scheme.len()).is_some_and(|prefix| {
         prefix.eq_ignore_ascii_case(scheme)
-            && input.get(scheme.len()..).is_some_and(|suffix| suffix.starts_with(':'))
+            && input
+                .get(scheme.len()..)
+                .is_some_and(|suffix| suffix.starts_with(':'))
     })
 }
 
