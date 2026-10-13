@@ -42,6 +42,14 @@ fn malformed_http_url_fails_closed() {
 }
 
 #[test]
+fn unicode_input_does_not_panic_on_scheme_detection() {
+    assert_eq!(
+        resolve_navigation("a😊:search"),
+        NavigationDecision::Search("a😊:search".to_owned())
+    );
+}
+
+#[test]
 fn unsupported_ftp_is_not_a_search() {
     assert_eq!(
         resolve_navigation("ftp://example.com"),
