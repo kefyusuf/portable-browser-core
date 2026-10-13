@@ -1,0 +1,30 @@
+name: Core CI
+
+on:
+  push:
+    branches: [main, "feat/**"]
+  pull_request:
+
+jobs:
+  rust-core:
+    name: Rust / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned toolchain
+        run: rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
+      - name: Format
+        run: cargo +1.98.1 fmt --all -- --check
+      - name: Test
+        run: cargo +1.98.1 test --workspace
+      - name: Clippy
+        run: cargo +1.98.1 clippy --workspace --all-targets -- -D warnings
+      - name: WASM target compile
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          rustup target add wasm32-unknown-unknown --toolchain 1.98.1
+          cargo +1.98.1 check --workspace --target wasm32-unknown-unknown

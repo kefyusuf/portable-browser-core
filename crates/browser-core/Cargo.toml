@@ -1,0 +1,10 @@
+[package]
+name = "browser-core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.98"
+description = "Pure deterministic navigation decision core"
+publish = false
+
+[dependencies]
+url = "=2.5.4"
