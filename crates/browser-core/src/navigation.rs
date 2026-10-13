@@ -68,10 +68,7 @@ pub fn resolve_navigation(raw: &str) -> NavigationDecision {
 
 fn parse_http_url(candidate: &str) -> NavigationDecision {
     match Url::parse(candidate) {
-        Ok(url)
-            if matches!(url.scheme(), "http" | "https")
-                && url.host_str().is_some() =>
-        {
+        Ok(url) if matches!(url.scheme(), "http" | "https") && url.host_str().is_some() => {
             NavigationDecision::Url(url.to_string())
         }
         _ => NavigationDecision::Rejection(RejectionReason::InvalidUrl),
@@ -79,9 +76,10 @@ fn parse_http_url(candidate: &str) -> NavigationDecision {
 }
 
 fn starts_with_scheme(input: &str, scheme: &str) -> bool {
-    input
-        .get(..scheme.len() + 1)
-        .is_some_and(|prefix| prefix[..scheme.len()].eq_ignore_ascii_case(scheme) && prefix.ends_with(':'))
+    input.get(..scheme.len()).is_some_and(|prefix| {
+        prefix.eq_ignore_ascii_case(scheme)
+            && input.get(scheme.len()..).is_some_and(|suffix| suffix.starts_with(':'))
+    })
 }
 
 fn has_scheme_prefix(input: &str) -> bool {
@@ -110,13 +108,14 @@ fn looks_like_bare_host(input: &str) -> bool {
         return false;
     }
 
-    let mut labels = host.split('.').peekable();
     let mut last_label = "";
-    while let Some(label) = labels.next() {
+    for label in host.split('.') {
         if label.is_empty()
             || label.starts_with('-')
             || label.ends_with('-')
-            || !label.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-')
+            || !label
+                .bytes()
+                .all(|c| c.is_ascii_alphanumeric() || c == b'-')
         {
             return false;
         }
