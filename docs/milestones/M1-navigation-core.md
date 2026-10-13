@@ -13,11 +13,9 @@ A pure Rust resolver with three outcomes, a 30-row deterministic fixture, and a 
 - [x] Inferred HTTPS for ordinary dotted hostnames, HTTP for localhost/IPv4.
 - [x] `1.2.3` and `127.1` remain searches.
 - [x] 30 golden fixtures exist in the branch (source inspection only).
-- [ ] `cargo fmt --all -- --check` passes on the exact PR head.
-- [ ] `cargo test --workspace` passes on Linux, macOS and Windows.
-- [ ] `cargo clippy --workspace --all-targets -- -D warnings` passes.
-- [ ] `cargo check --workspace --target wasm32-unknown-unknown` passes.
-- [ ] Review confirms the reconstruction does not silently diverge from the intended policy.
+- [ ] Latest PR head passes format/test/clippy on Linux, macOS and Windows, and `wasm32-unknown-unknown` compilation on Linux. (Previously green at `80e1f2e`; **new head must be rerun**.)
+- [ ] Independent review checks negative input cases and boundary fidelity.
+- [ ] The original M0/M1 ZIP is compared **or** reconstructed behavior is explicitly accepted as the new canonical baseline; an identical-source claim is not permitted without the original archive.
 
 ## Stop boundary
 

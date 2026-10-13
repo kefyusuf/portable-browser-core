@@ -50,6 +50,33 @@ fn unicode_input_does_not_panic_on_scheme_detection() {
 }
 
 #[test]
+fn embedded_ascii_controls_fail_closed() {
+    for input in [
+        "https://exa\nmple.com",
+        "https://exa\tmple.com",
+        "example.com/pa\rth",
+        "exa\tmple.com",
+        "foo\nbar",
+        "https://example.com/\u{0}data",
+        "https://example.com/\u{7f}data",
+    ] {
+        assert_eq!(
+            resolve_navigation(input),
+            NavigationDecision::Rejection(RejectionReason::InvalidUrl),
+            "unexpected decision for {input:?}"
+        );
+    }
+}
+
+#[test]
+fn outer_whitespace_remains_trimmable() {
+    assert_eq!(
+        resolve_navigation("  https://example.com/  "),
+        NavigationDecision::Url("https://example.com/".to_owned())
+    );
+}
+
+#[test]
 fn unsupported_ftp_is_not_a_search() {
     assert_eq!(
         resolve_navigation("ftp://example.com"),

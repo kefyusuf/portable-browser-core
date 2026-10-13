@@ -36,6 +36,12 @@ pub fn resolve_navigation(raw: &str) -> NavigationDecision {
         return NavigationDecision::Rejection(RejectionReason::EmptyInput);
     }
 
+    // URL parsers may silently strip embedded ASCII controls (e.g. newlines).
+    // Reject them before URL classification or normalization.
+    if input.bytes().any(|byte| byte.is_ascii_control()) {
+        return NavigationDecision::Rejection(RejectionReason::InvalidUrl);
+    }
+
     if let Some((scheme, _)) = input.split_once("://") {
         if !scheme.eq_ignore_ascii_case("http") && !scheme.eq_ignore_ascii_case("https") {
             return NavigationDecision::Rejection(RejectionReason::UnsupportedScheme);

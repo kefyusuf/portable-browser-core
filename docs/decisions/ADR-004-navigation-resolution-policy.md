@@ -1,6 +1,6 @@
 # ADR-004 — M1 navigation resolution
 
-**Status:** Accepted for M1 reconstruction; CI verification pending.
+**Status:** Accepted for M1 reconstruction; exact-head review pending.
 
 ## Context
 
@@ -15,6 +15,7 @@ An address bar may contain an explicit URL, a probable host, a search query, or 
 - `example.com:443/path` normalizes to `https://example.com/path`.
 - Ambiguous numeric forms (`1.2.3`, `127.1`) remain search queries.
 - Leading/trailing whitespace around the entire input is trimmed; ordinary free text remains a search query.
+- Any remaining embedded ASCII control byte (C0 or DEL) is rejected as `invalid_url` before URL parsing, including within what otherwise looks like search text. This prevents silent stripping of tabs/newlines by URL parsers. It is deliberately strict because M1 classifies single-line address-bar input.
 - Returning `Url` does not authorize or execute a network request. Hosts retain responsibility for network policy, redirects, and execution.
 
 ## Explicitly out of scope
