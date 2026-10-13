@@ -22,13 +22,13 @@ Requires Rust 1.98.1. From repository root:
 
 ```sh
 cargo fmt --all -- --check
-cargo test --workspace
-cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace --locked
+cargo clippy --workspace --all-targets --locked -- -D warnings
 rustup target add wasm32-unknown-unknown
-cargo check --workspace --target wasm32-unknown-unknown
+cargo check --workspace --locked --target wasm32-unknown-unknown
 ```
 
-CI must pass on Linux, macOS and Windows, with a WASM-target compile check. See [M1 acceptance](docs/milestones/M1-navigation-core.md).
+The Cargo.lock file is checked in. CI uses --locked to reject unrecorded dependency resolution changes. CI must pass on Linux, macOS and Windows, with a WASM-target compile check. See [M1 acceptance](docs/milestones/M1-navigation-core.md).
 
 ## Milestones
 
