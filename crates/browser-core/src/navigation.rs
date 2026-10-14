@@ -43,10 +43,14 @@ pub fn resolve_navigation(raw: &str) -> NavigationDecision {
     }
 
     if let Some((scheme, _)) = input.split_once("://") {
-        if !scheme.eq_ignore_ascii_case("http") && !scheme.eq_ignore_ascii_case("https") {
-            return NavigationDecision::Rejection(RejectionReason::UnsupportedScheme);
+        // Only a leading valid URI-scheme token makes this an explicit scheme.
+        // A colon-slash sequence in search text or a bare-host path is not one.
+        if is_scheme_name(scheme) {
+            if !scheme.eq_ignore_ascii_case("http") && !scheme.eq_ignore_ascii_case("https") {
+                return NavigationDecision::Rejection(RejectionReason::UnsupportedScheme);
+            }
+            return parse_http_url(input);
         }
-        return parse_http_url(input);
     }
 
     // A malformed explicit HTTP URL is never silently downgraded to a search.
@@ -91,9 +95,12 @@ fn starts_with_scheme(input: &str, scheme: &str) -> bool {
 }
 
 fn has_scheme_prefix(input: &str) -> bool {
-    let Some((prefix, _)) = input.split_once(':') else {
-        return false;
-    };
+    input
+        .split_once(':')
+        .is_some_and(|(prefix, _)| is_scheme_name(prefix))
+}
+
+fn is_scheme_name(prefix: &str) -> bool {
     let mut chars = prefix.bytes();
     matches!(chars.next(), Some(c) if c.is_ascii_alphabetic())
         && chars.all(|c| c.is_ascii_alphanumeric() || matches!(c, b'+' | b'-' | b'.'))

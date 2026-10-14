@@ -26,6 +26,26 @@ fn navigation_golden_matrix() {
 }
 
 #[test]
+fn colon_slashes_outside_leading_scheme_are_not_unsupported() {
+    assert_eq!(
+        resolve_navigation("how do I use https://example.com"),
+        NavigationDecision::Search("how do I use https://example.com".to_owned())
+    );
+    assert_eq!(
+        resolve_navigation("example.com/guide://section"),
+        NavigationDecision::Url("https://example.com/guide://section".to_owned())
+    );
+    assert_eq!(
+        resolve_navigation("example.com:443/guide://section"),
+        NavigationDecision::Url("https://example.com/guide://section".to_owned())
+    );
+    assert_eq!(
+        resolve_navigation("mailto://user@example.com"),
+        NavigationDecision::Rejection(RejectionReason::UnsupportedScheme)
+    );
+}
+
+#[test]
 fn malformed_http_url_fails_closed() {
     assert_eq!(
         resolve_navigation("https://"),

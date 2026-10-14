@@ -11,6 +11,7 @@ An address bar may contain an explicit URL, a probable host, a search query, or 
 - `resolve_navigation(&str)` returns exactly `Url`, `Search`, or `Rejection`.
 - Only `http` and `https` URLs are allowed. Any other recognized scheme is rejected with `unsupported_scheme`.
 - An explicit malformed HTTP(S) URL is rejected with `invalid_url`, not searched.
+- A `://` sequence is treated as a URI scheme delimiter only if the prefix is a syntactically valid scheme token at the **start** of the input. Occurrences within ordinary search text or the path of a bare hostname must not cause `unsupported_scheme`.
 - Recognizable bare hostnames are prefixed with `https://`. `localhost` and dotted-quad IPv4 literals are prefixed with `http://`. URL parsing/normalization is delegated to the pure Rust `url` crate.
 - `example.com:443/path` normalizes to `https://example.com/path`.
 - Ambiguous numeric forms (`1.2.3`, `127.1`) remain search queries.
