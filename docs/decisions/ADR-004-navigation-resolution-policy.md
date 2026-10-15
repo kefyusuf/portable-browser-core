@@ -1,6 +1,6 @@
 # ADR-004 — M1 navigation resolution
 
-**Status:** Accepted for M1 reconstruction; exact-head review pending.
+**Status:** Proposed for M1 reconstruction. Independent policy acceptance and baseline-provenance decision pending.
 
 ## Context
 
