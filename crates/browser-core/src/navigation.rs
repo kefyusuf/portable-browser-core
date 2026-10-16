@@ -141,6 +141,18 @@ fn looks_like_bare_host(input: &str) -> bool {
         last_label = label;
     }
 
+    // WHATWG can interpret hexadecimal-ending host labels as IPv4 numbers.
+    // Do not infer a URL that silently normalizes to a different address.
+    let hexadecimal_suffix = last_label
+        .strip_prefix("0x")
+        .or_else(|| last_label.strip_prefix("0X"))
+        .is_some_and(|digits| {
+            !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_hexdigit())
+        });
+    if hexadecimal_suffix {
+        return false;
+    }
+
     last_label.len() >= 2 && last_label.bytes().any(|c| c.is_ascii_alphabetic())
 }
 
