@@ -151,7 +151,7 @@ fn is_ipv4_quad(host: &str) -> bool {
             !part.is_empty()
                 && part.bytes().all(|c| c.is_ascii_digit())
                 // WHATWG URL parsing may interpret leading-zero values as octal.
-                && (part == "0" || !part.starts_with('0'))
+                && (*part == "0" || !part.starts_with('0'))
                 && part.parse::<u8>().is_ok()
         })
 }
