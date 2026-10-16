@@ -107,11 +107,15 @@ fn is_scheme_name(prefix: &str) -> bool {
 }
 
 fn looks_like_bare_host(input: &str) -> bool {
-    if input.chars().any(char::is_whitespace) || input.contains('@') {
+    if input.chars().any(char::is_whitespace) {
         return false;
     }
 
     let authority = input.split(['/', '?', '#']).next().unwrap_or(input);
+    // Guard the authority, not the path/query/fragment, against userinfo.
+    if authority.contains('@') {
+        return false;
+    }
     let host = authority.split(':').next().unwrap_or(authority);
 
     if host.eq_ignore_ascii_case("localhost") || is_ipv4_quad(host) {
