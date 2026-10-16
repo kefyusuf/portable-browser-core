@@ -102,6 +102,26 @@ fn leading_zero_ipv4_quads_remain_searches() {
 }
 
 #[test]
+fn hexadecimal_ending_ipv4_like_hosts_remain_searches() {
+    // WHATWG URL parsing recognizes 0x-prefixed host suffixes as IPv4 numbers.
+    for input in ["127.0.0.0x1", "127.0.0.0X1", "example.0xA"] {
+        assert_eq!(
+            resolve_navigation(input),
+            NavigationDecision::Search(input.to_owned()),
+            "unexpected numeric-like hostname classification for {input:?}"
+        );
+    }
+}
+
+#[test]
+fn ordinary_alphabetic_hostnames_still_infer_https() {
+    assert_eq!(
+        resolve_navigation("example.technology"),
+        NavigationDecision::Url("https://example.technology/".to_owned())
+    );
+}
+
+#[test]
 fn unambiguous_ipv4_quads_still_infer_http() {
     for (input, expected) in [
         ("0.0.0.0", "http://0.0.0.0/"),
