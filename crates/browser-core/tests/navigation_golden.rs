@@ -46,6 +46,43 @@ fn colon_slashes_outside_leading_scheme_are_not_unsupported() {
 }
 
 #[test]
+fn at_sign_in_bare_host_path_query_or_fragment_is_not_userinfo() {
+    for (input, expected) in [
+        (
+            "example.com/contact@support",
+            "https://example.com/contact@support",
+        ),
+        (
+            "example.com/?contact=staff@example.com",
+            "https://example.com/?contact=staff@example.com",
+        ),
+        ("example.com/#team@home", "https://example.com/#team@home"),
+        (
+            "localhost:8000/contact@support",
+            "http://localhost:8000/contact@support",
+        ),
+    ] {
+        assert_eq!(
+            resolve_navigation(input),
+            NavigationDecision::Url(expected.to_owned()),
+            "unexpected classification for {input:?}"
+        );
+    }
+}
+
+#[test]
+fn userinfo_in_bare_host_authority_does_not_infer_url() {
+    assert_eq!(
+        resolve_navigation("user@example.com/path"),
+        NavigationDecision::Search("user@example.com/path".to_owned())
+    );
+    assert_eq!(
+        resolve_navigation("example.com@evil.test/path"),
+        NavigationDecision::Search("example.com@evil.test/path".to_owned())
+    );
+}
+
+#[test]
 fn malformed_http_url_fails_closed() {
     assert_eq!(
         resolve_navigation("https://"),
