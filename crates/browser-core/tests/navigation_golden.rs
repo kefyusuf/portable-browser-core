@@ -83,6 +83,40 @@ fn userinfo_in_bare_host_authority_does_not_infer_url() {
 }
 
 #[test]
+fn leading_zero_ipv4_quads_remain_searches() {
+    // WHATWG IPv4 parsing can treat leading-zero components as octal.
+    // A bare numeric host must not silently resolve to another address.
+    for input in [
+        "010.0.0.1",
+        "001.2.3.4",
+        "127.000.0.1",
+        "08.0.0.1",
+        "000.0.0.0",
+    ] {
+        assert_eq!(
+            resolve_navigation(input),
+            NavigationDecision::Search(input.to_owned()),
+            "unexpected numeric host classification for {input:?}"
+        );
+    }
+}
+
+#[test]
+fn unambiguous_ipv4_quads_still_infer_http() {
+    for (input, expected) in [
+        ("0.0.0.0", "http://0.0.0.0/"),
+        ("10.0.0.1", "http://10.0.0.1/"),
+        ("192.168.1.1", "http://192.168.1.1/"),
+    ] {
+        assert_eq!(
+            resolve_navigation(input),
+            NavigationDecision::Url(expected.to_owned()),
+            "unexpected numeric host classification for {input:?}"
+        );
+    }
+}
+
+#[test]
 fn malformed_http_url_fails_closed() {
     assert_eq!(
         resolve_navigation("https://"),
