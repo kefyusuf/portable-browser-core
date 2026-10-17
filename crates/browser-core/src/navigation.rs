@@ -147,7 +147,7 @@ fn looks_like_bare_host(input: &str) -> bool {
         .strip_prefix("0x")
         .or_else(|| last_label.strip_prefix("0X"))
         .is_some_and(|digits| {
-            !digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_hexdigit())
+            digits.bytes().all(|byte| byte.is_ascii_hexdigit())
         });
     if hexadecimal_suffix {
         return false;
