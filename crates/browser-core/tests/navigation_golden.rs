@@ -104,7 +104,14 @@ fn leading_zero_ipv4_quads_remain_searches() {
 #[test]
 fn hexadecimal_ending_ipv4_like_hosts_remain_searches() {
     // WHATWG URL parsing recognizes 0x-prefixed host suffixes as IPv4 numbers.
-    for input in ["127.0.0.0x1", "127.0.0.0X1", "example.0xA"] {
+    for input in [
+        "127.0.0.0x",
+        "127.0.0.0X",
+        "127.0.0.0x1",
+        "127.0.0.0X1",
+        "example.0x",
+        "example.0xA",
+    ] {
         assert_eq!(
             resolve_navigation(input),
             NavigationDecision::Search(input.to_owned()),
