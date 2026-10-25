@@ -195,6 +195,25 @@ fn outer_whitespace_remains_trimmable() {
 }
 
 #[test]
+fn explicit_urls_normalize_through_url_crate_not_inference_guards() {
+    // ADR-004: the ambiguous-numeric guards apply to inferred, scheme-less
+    // hosts only. Explicit HTTP(S) URLs are normalized by the url crate, so
+    // hosts must evaluate the returned value, not the raw input text.
+    assert_eq!(
+        resolve_navigation("http://010.0.0.1"),
+        NavigationDecision::Url("http://8.0.0.1/".to_owned())
+    );
+    assert_eq!(
+        resolve_navigation("http://127.0.0.0x1"),
+        NavigationDecision::Url("http://127.0.0.1/".to_owned())
+    );
+    assert_eq!(
+        resolve_navigation("http://example.com:80/a"),
+        NavigationDecision::Url("http://example.com/a".to_owned())
+    );
+}
+
+#[test]
 fn unsupported_ftp_is_not_a_search() {
     assert_eq!(
         resolve_navigation("ftp://example.com"),
