@@ -1,6 +1,6 @@
 # M2 — Tab state machine
 
-**State: IMPLEMENTING** — semantics accepted 2026-10-25; implementation and fixtures on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-25.
 
 ## Deliverable
 
@@ -16,8 +16,8 @@ A pure, deterministic, single-tab navigation lifecycle and session-history machi
 - [x] Reload re-emits the current entry without duplicating it.
 - [x] Effects are requests only (`StartLoad`); the core never executes loads. Search-engine selection stays with the host per ADR-004.
 - [x] Golden transition fixtures exist with an exact-count drift guard (10 scenarios, 55 steps; source inspection until CI).
-- [ ] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head.
-- [ ] Independent acceptance of ADR-005 semantics for the final exact HEAD.
+- [x] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head. *(Core CI run [40242531414](https://github.com/kefyusuf/portable-browser-core/actions/runs/40242531414) PASS on head `fb1a22c`.)*
+- [x] Independent acceptance of ADR-005 semantics for the final exact HEAD. *(Maintainer accepted 2026-10-25 by approving the merge of PR #2. Semantics acceptance recorded 2026-10-25 before implementation; local Windows verification (pinned 1.98.1: fmt, 18 locked tests, Clippy, WASM check) and the golden-fixture audit are recorded in the PR evidence comment.)*
 
 ## Baseline/provenance
 

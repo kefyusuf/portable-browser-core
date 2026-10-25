@@ -1,6 +1,6 @@
 # ADR-005 — M2 tab state machine
 
-**Status:** Semantics accepted 2026-10-25 (maintainer go-ahead); implemented with golden transition fixtures on `feat/m2-tab-state-machine`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-25 (PR #2, accepted head `fb1a22c`, CI run 40242531414). Semantics acceptance was recorded before implementation; see the M2 milestone for the evidence index.
 
 ## Context
 
