@@ -1,0 +1,31 @@
+# input<TAB>url|search|reject<TAB>normalized value or rejection reason
+https://example.com	url	https://example.com/
+http://example.com	url	http://example.com/
+example.com	url	https://example.com/
+example.com/path	url	https://example.com/path
+example.com:443/path	url	https://example.com/path
+example.com:8443/path	url	https://example.com:8443/path
+HTTP://EXAMPLE.COM	url	http://example.com/
+www.example.com	url	https://www.example.com/
+localhost	url	http://localhost/
+localhost:8000	url	http://localhost:8000/
+localhost:8000/health	url	http://localhost:8000/health
+127.0.0.1	url	http://127.0.0.1/
+127.0.0.1:3000	url	http://127.0.0.1:3000/
+192.168.1.1	url	http://192.168.1.1/
+http://example.com:80/a	url	http://example.com/a
+https://example.com:443/a	url	https://example.com/a
+sub.example.com/foo?q=x#top	url	https://sub.example.com/foo?q=x#top
+rust language	search	rust language
+  rust language  	search	rust language
+1.2.3	search	1.2.3
+127.1	search	127.1
+where is the documentation	search	where is the documentation
+	reject	empty_input
+   	reject	empty_input
+file:///etc/passwd	reject	unsupported_scheme
+about:blank	reject	unsupported_scheme
+javascript:alert(1)	reject	unsupported_scheme
+data:text/plain,hello	reject	unsupported_scheme
+mailto:user@example.com	reject	unsupported_scheme
+com.example.app://open	reject	unsupported_scheme
