@@ -1,6 +1,6 @@
 # ADR-005 — M2 tab state machine
 
-**Status:** Proposed for M2. Independent semantics acceptance pending.
+**Status:** Semantics accepted 2026-10-25 (maintainer go-ahead); implemented with golden transition fixtures on `feat/m2-tab-state-machine`. Milestone evidence (multi-platform CI and independent acceptance) pending.
 
 ## Context
 
@@ -13,10 +13,10 @@ After M1, the core classifies address-bar input into `Url`, `Search`, or `Reject
 - **State.** `Empty` (no history), `Loading { pending_url }` (a target is awaiting a host load report), `Active` (an entry is current). Internally: an ordered `Vec<Entry>` plus a cursor. `Entry` carries the normalized target URL string only. Page titles, favicons, and scroll state are host display state, not core state in M2.
 - **Events** (each returns an outcome: resulting state view plus at most one effect):
   - `navigate(url)` — valid from any state. Sets the pending target (last-pending-wins if already `Loading`), produces `StartLoad(url)`. It performs **no** history mutation: no append, no truncation.
-  - `commit()` — valid only from `Loading`. The host reports the load succeeded: the forward stack is truncated here (at commit, not at navigate), `Entry { pending_url }` is appended, the cursor moves to the new last entry, state becomes `Active`, effect `None`. Rationale: truncating at navigate would destroy reachable forward history when the load ultimately fails.
+  - `commit()` — valid only from `Loading`. The host reports the load succeeded and the pending target is cleared. If the pending target is a fresh navigation, the forward stack is truncated here (at commit, not at navigate), `Entry { url }` is appended, the cursor moves to the new last entry, and state becomes `Active`. If the pending target is a reload, the bookkeeping is unchanged: the entry already exists and must not be duplicated. Effect `None` in both cases. Rationale: truncating at navigate would destroy reachable forward history when the load ultimately fails.
   - `fail()` / `stop()` — valid only from `Loading`. The pending target is discarded and the state reverts to what it was before the navigation (`Active` at the unchanged cursor, or `Empty`), effect `None`. Error pages are host concerns and are not history entries.
   - `back()` / `forward()` — valid only from `Active`. Move the cursor one step within `[0, len-1]` and produce `StartLoad(entry_url)`; at a boundary the event is a no-op with reason `at_boundary` and effect `None`. Invoking them while `Loading` is a no-op with reason `unexpected_event`; a host that wants browser-like behavior composes `stop` → `back` itself.
-  - `reload()` — valid only from `Active`. Re-emits the current entry's URL as a pending target: state `Loading`, effect `StartLoad(current_url)`, no entry duplication. In `Empty` it is a no-op with reason `nothing_to_reload`.
+  - `reload()` — valid only from `Active`. Re-emits the current entry's URL as a pending target: state `Loading`, effect `StartLoad(current_url)`. The pending target is marked as a reload so that a later `commit` does not append a duplicate entry. In `Empty` it is a no-op with reason `nothing_to_reload`.
 - **Effects are requests.** The only effect in M2 is `StartLoad(url)`. The core never performs a load and returning a URL is not authorization; hosts own network policy, redirects, and execution (same boundary as ADR-004).
 - **Composition with M1.** The machine takes already-resolved targets and does not re-parse them. `Url` decisions from `resolve_navigation` are valid targets; a `Search` decision requires the host to pick its search engine (out of core scope per ADR-004) and submit the resulting URL; `Rejection` never reaches the machine. No M1 behavior is duplicated inside M2.
 - **Determinism.** No clocks, no randomness, no environment reads. Replaying the same event sequence over the same initial state yields identical states and effects on every platform.

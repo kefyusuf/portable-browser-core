@@ -34,6 +34,6 @@ The Cargo.lock file is checked in. CI uses --locked to reject unrecorded depende
 
 - **M0:** Boundaries and repository bootstrap — present, no claim of reproducing earlier ZIP exactly.
 - **M1:** Navigation resolver and deterministic golden cases — **DONE** (accepted and merged 2026-10-25).
-- **M2:** Tab state machine — **NOT STARTED**; docs-first in progress ([milestone](docs/milestones/M2-tab-state-machine.md), [ADR-005](docs/decisions/ADR-005-tab-state-machine.md)).
+- **M2:** Tab state machine — **IN REVIEW**: semantics accepted, implementation and golden fixtures on [PR #2](https://github.com/kefyusuf/portable-browser-core/pull/2) ([milestone](docs/milestones/M2-tab-state-machine.md), [ADR-005](docs/decisions/ADR-005-tab-state-machine.md)).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.

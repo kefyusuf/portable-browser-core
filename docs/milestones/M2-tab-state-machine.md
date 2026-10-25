@@ -1,6 +1,6 @@
 # M2 — Tab state machine
 
-**State: PROPOSED** — docs-first; implementation not started.
+**State: IMPLEMENTING** — semantics accepted 2026-10-25; implementation and fixtures on the branch, CI and independent acceptance pending.
 
 ## Deliverable
 
@@ -8,14 +8,14 @@ A pure, deterministic, single-tab navigation lifecycle and session-history machi
 
 ## Acceptance criteria
 
-- [ ] Public tab machine API exists and is total: every (event, state) combination returns an outcome, never panics.
-- [ ] States `Empty` / `Loading` / `Active` with host-reported `commit`, `fail`, and `stop` transitions.
-- [ ] Back/forward move the history cursor within bounds and are documented no-ops at the boundaries.
-- [ ] Forward-stack truncation happens at commit only; a failed navigation leaves no phantom entry.
-- [ ] Re-navigate while loading replaces the pending target (last-pending-wins).
-- [ ] Reload re-emits the current entry without duplicating it.
-- [ ] Effects are requests only (`StartLoad`); the core never executes loads. Search-engine selection stays with the host per ADR-004.
-- [ ] Golden transition fixtures exist with an exact-count drift guard (source inspection until CI).
+- [x] Public tab machine API exists and is total: every (event, state) combination returns an outcome, never panics.
+- [x] States `Empty` / `Loading` / `Active` with host-reported `commit`, `fail`, and `stop` transitions.
+- [x] Back/forward move the history cursor within bounds and are documented no-ops at the boundaries.
+- [x] Forward-stack truncation happens at commit only; a failed navigation leaves no phantom entry.
+- [x] Re-navigate while loading replaces the pending target (last-pending-wins).
+- [x] Reload re-emits the current entry without duplicating it.
+- [x] Effects are requests only (`StartLoad`); the core never executes loads. Search-engine selection stays with the host per ADR-004.
+- [x] Golden transition fixtures exist with an exact-count drift guard (10 scenarios, 55 steps; source inspection until CI).
 - [ ] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head.
 - [ ] Independent acceptance of ADR-005 semantics for the final exact HEAD.
 
