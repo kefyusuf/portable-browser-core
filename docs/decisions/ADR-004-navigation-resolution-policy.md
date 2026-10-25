@@ -1,6 +1,6 @@
 # ADR-004 — M1 navigation resolution
 
-**Status:** Proposed for M1 reconstruction. Independent policy acceptance and baseline-provenance decision pending.
+**Status:** Proposed for M1 reconstruction. Baseline-provenance decision resolved 2026-10-25 (reconstruction designated canonical — see M1 milestone); independent policy acceptance pending.
 
 ## Context
 
@@ -18,6 +18,7 @@ An address bar may contain an explicit URL, a probable host, a search query, or 
 - Ambiguous numeric forms (`1.2.3`, `127.1`) remain search queries.
 - Bare IPv4-looking quads with leading-zero multi-digit components (for example, `010.0.0.1`) remain search queries rather than being octal-normalized to a different destination. A single `0` component remains valid.
 - A bare hostname ending in a hexadecimal IPv4-number label (for example, `127.0.0.0x1` or the empty hexadecimal suffix `127.0.0.0x`) remains a search query rather than being silently normalized to a different IPv4 destination. Ordinary alphabetic hostname endings remain URL candidates.
+- A trailing dot on an otherwise recognizable bare hostname (for example, `example.com.`) leaves an empty final label, so the input does not qualify as a bare host and remains a search query. Hosts that want root-qualified names must pass an explicit HTTP(S) URL.
 - The ambiguous-numeric-host search guards apply to **inferred, scheme-less hosts only**. Explicit HTTP(S) URLs are normalized by the `url` crate; for example, `http://010.0.0.1` yields `http://8.0.0.1/`. Hosts must evaluate the returned, normalized `Url` value under their own network policy, not assume it is textually identical to the raw input.
 - Leading/trailing whitespace around the entire input is trimmed; ordinary free text remains a search query.
 - Any remaining embedded ASCII control byte (C0 or DEL) is rejected as `invalid_url` before URL parsing, including within what otherwise looks like search text. This prevents silent stripping of tabs/newlines by URL parsers. It is deliberately strict because M1 classifies single-line address-bar input.
