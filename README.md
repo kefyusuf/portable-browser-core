@@ -2,7 +2,7 @@
 
 A platform-independent browser decision core. The current executable slice is deterministic address/navigation resolution in Rust.
 
-**Status:** M0 repository baseline created; M1 is **VERIFYING**, not complete.
+**Status:** M1 **DONE** — accepted and merged 2026-10-25 (PR #1, accepted head `9779823`, merge commit `17cf8c7`, [CI run 40220530561](https://github.com/kefyusuf/portable-browser-core/actions/runs/40220530561)).
 
 ## Frozen boundary
 
@@ -33,7 +33,7 @@ The Cargo.lock file is checked in. CI uses --locked to reject unrecorded depende
 ## Milestones
 
 - **M0:** Boundaries and repository bootstrap — present, no claim of reproducing earlier ZIP exactly.
-- **M1:** Navigation resolver and deterministic golden cases — VERIFYING until CI and review confirm.
-- **M2:** Tab state machine — **NOT STARTED / BLOCKED** on M1.
+- **M1:** Navigation resolver and deterministic golden cases — **DONE** (accepted and merged 2026-10-25).
+- **M2:** Tab state machine — **NOT STARTED**, unblocked 2026-10-25; starts docs-first (milestone doc + ADR before code).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.
