@@ -97,10 +97,13 @@ fn assert_noop(outcome: &ContainerOutcome, cell: &str, row: usize) {
     let expected = match cell {
         "-" => None,
         reason => {
-            let known = [ContainerNoOpReason::UnknownTab]
-                .into_iter()
-                .find(|known| known.as_str() == reason)
-                .unwrap_or_else(|| panic!("unknown noop reason {reason:?} at row {row}"));
+            let known = [
+                ContainerNoOpReason::UnknownTab,
+                ContainerNoOpReason::IndexOutOfRange,
+            ]
+            .into_iter()
+            .find(|known| known.as_str() == reason)
+            .unwrap_or_else(|| panic!("unknown noop reason {reason:?} at row {row}"));
             Some(known)
         }
     };
@@ -144,6 +147,18 @@ fn parse_container_event(event: &str, arg: &str, row: usize) -> ContainerEvent {
             other => panic!("unknown inner event {other:?} at row {row}"),
         };
         return ContainerEvent::Tab(id, tab_event);
+    }
+    if let Some(rest) = event.strip_prefix("move:") {
+        let (id, to_index) = rest
+            .split_once(':')
+            .unwrap_or_else(|| panic!("bad move event at row {row}"));
+        return ContainerEvent::MoveTab(
+            id.parse()
+                .unwrap_or_else(|_| panic!("bad move id at row {row}")),
+            to_index
+                .parse()
+                .unwrap_or_else(|_| panic!("bad move index at row {row}")),
+        );
     }
     panic!("unknown container event {event:?} at row {row}");
 }
@@ -190,8 +205,8 @@ fn container_golden_matrix() {
         checked += 1;
     }
 
-    assert_eq!(scenario_count, 6, "M3 fixture scenario count drift");
-    assert_eq!(checked, 28, "M3 fixture row count drift");
+    assert_eq!(scenario_count, 9, "fixture scenario count drift");
+    assert_eq!(checked, 44, "fixture row count drift");
 }
 
 #[test]
@@ -267,4 +282,39 @@ fn background_tab_commits_while_another_is_active() {
         background.state.current_url.as_deref(),
         Some("https://c.test/")
     );
+}
+
+#[test]
+fn moving_active_tab_keeps_activation() {
+    let mut container = TabContainer::new();
+    for _ in 0..3 {
+        container.handle(ContainerEvent::NewTab(None));
+    }
+    container.handle(ContainerEvent::Activate(2));
+    let outcome = container.handle(ContainerEvent::MoveTab(2, 0));
+    // Activation follows the id, not the position.
+    assert_eq!(outcome.view.active_id, Some(2));
+    let first = outcome.view.tabs.first().expect("strip not empty");
+    assert_eq!(first.id, 2);
+    assert!(first.is_active);
+    let ids: Vec<u64> = outcome.view.tabs.iter().map(|tab| tab.id).collect();
+    assert_eq!(ids, vec![2, 1, 3]);
+}
+
+#[test]
+fn reorder_moves_load_state_with_the_identity() {
+    let mut container = TabContainer::new();
+    container.handle(ContainerEvent::NewTab(Some("https://a.test/".into())));
+    container.handle(ContainerEvent::NewTab(None));
+    let outcome = container.handle(ContainerEvent::MoveTab(1, 1));
+    // The loading tab's machine state travels with its id, untouched.
+    assert_eq!(outcome.view.active_id, Some(2));
+    let moved = outcome
+        .view
+        .tabs
+        .iter()
+        .find(|tab| tab.id == 1)
+        .expect("tab 1 exists");
+    assert_eq!(moved.state.phase, TabPhase::Loading);
+    assert_eq!(moved.state.pending_url.as_deref(), Some("https://a.test/"));
 }
