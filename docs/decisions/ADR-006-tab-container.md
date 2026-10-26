@@ -1,6 +1,6 @@
 # ADR-006 — M3 tab container
 
-**Status:** Semantics accepted 2026-10-25 (maintainer go-ahead); implemented with golden container scenarios on `feat/m3-tab-container`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-26 (PR #3, accepted head `8afca7f`, CI run 40397253703). Semantics acceptance was recorded before implementation; see the M3 milestone for the evidence index.
 
 ## Context
 

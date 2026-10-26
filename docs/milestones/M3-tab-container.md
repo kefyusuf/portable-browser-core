@@ -1,6 +1,6 @@
 # M3 — Tab container
 
-**State: IMPLEMENTING** — semantics accepted 2026-10-25; implementation and fixtures on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-26.
 
 ## Deliverable
 
@@ -17,8 +17,8 @@ A pure, deterministic container over ordered `TabMachine` instances: tab creatio
 - [x] Tab events route to the addressed tab's M2 machine without duplicating M2 semantics; the affected tab's outcome is surfaced.
 - [x] The container view exposes ordered tab summaries (id, active flag, full M2 state view) plus the active id.
 - [x] Golden container scenarios exist with exact-count drift guards (6 scenarios, 28 steps; source inspection until CI).
-- [ ] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head.
-- [ ] Independent acceptance of ADR-006 semantics for the final exact HEAD.
+- [x] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head. *(Core CI run [40397253703](https://github.com/kefyusuf/portable-browser-core/actions/runs/40397253703) PASS on head `8afca7f`.)*
+- [x] Independent acceptance of ADR-006 semantics for the final exact HEAD. *(Maintainer accepted 2026-10-26 by approving the merge of PR #3. Semantics acceptance recorded 2026-10-25 before implementation; local Windows verification (pinned 1.98.1: fmt, 23 locked tests, Clippy, WASM check) and the golden-fixture audit are recorded in the PR evidence comment.)*
 
 ## Baseline/provenance
 
