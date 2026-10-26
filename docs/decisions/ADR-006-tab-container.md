@@ -1,6 +1,6 @@
 # ADR-006 — M3 tab container
 
-**Status:** Proposed for M3. Independent semantics acceptance pending.
+**Status:** Semantics accepted 2026-10-25 (maintainer go-ahead); implemented with golden container scenarios on `feat/m3-tab-container`. Milestone evidence (multi-platform CI and independent acceptance) pending.
 
 ## Context
 

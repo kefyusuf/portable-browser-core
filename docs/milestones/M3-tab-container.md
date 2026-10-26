@@ -1,6 +1,6 @@
 # M3 — Tab container
 
-**State: PROPOSED** — docs-first; implementation not started.
+**State: IMPLEMENTING** — semantics accepted 2026-10-25; implementation and fixtures on the branch, CI and independent acceptance pending.
 
 ## Deliverable
 
@@ -8,15 +8,15 @@ A pure, deterministic container over ordered `TabMachine` instances: tab creatio
 
 ## Acceptance criteria
 
-- [ ] Public tab container API exists and is total: every (event, state) combination returns an outcome, never panics.
-- [ ] Tab identities are deterministic (sequential, never reused) across a replayed event sequence.
-- [ ] `NewTab` appends at the end and activates; with an initial target it navigates atomically.
-- [ ] Closing the active tab activates its right neighbor, else its left neighbor; closing a background tab keeps the active tab.
-- [ ] The container may become empty; the empty state is representable and the host owns empty-state presentation.
-- [ ] Events addressing a nonexistent tab are reasoned no-ops (`unknown_tab`).
-- [ ] Tab events route to the addressed tab's M2 machine without duplicating M2 semantics; the affected tab's outcome is surfaced.
-- [ ] The container view exposes ordered tab summaries (id, active flag, full M2 state view) plus the active id.
-- [ ] Golden container scenarios exist with exact-count drift guards (source inspection until CI).
+- [x] Public tab container API exists and is total: every (event, state) combination returns an outcome, never panics.
+- [x] Tab identities are deterministic (sequential, never reused) across a replayed event sequence.
+- [x] `NewTab` appends at the end and activates; with an initial target it navigates atomically.
+- [x] Closing the active tab activates its right neighbor, else its left neighbor; closing a background tab keeps the active tab.
+- [x] The container may become empty; the empty state is representable and the host owns empty-state presentation.
+- [x] Events addressing a nonexistent tab are reasoned no-ops (`unknown_tab`).
+- [x] Tab events route to the addressed tab's M2 machine without duplicating M2 semantics; the affected tab's outcome is surfaced.
+- [x] The container view exposes ordered tab summaries (id, active flag, full M2 state view) plus the active id.
+- [x] Golden container scenarios exist with exact-count drift guards (6 scenarios, 28 steps; source inspection until CI).
 - [ ] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head.
 - [ ] Independent acceptance of ADR-006 semantics for the final exact HEAD.
 
