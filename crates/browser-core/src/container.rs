@@ -19,6 +19,9 @@ pub enum ContainerEvent {
     Activate(u64),
     /// Delegate an M2 event to the addressed tab's machine.
     Tab(u64, TabEvent),
+    /// Reposition the addressed tab so it sits at the target index
+    /// (0-based) afterwards. Ids, load state, and history are untouched.
+    MoveTab(u64, usize),
 }
 
 /// Why a container event produced no transition. The container is total:
@@ -27,12 +30,15 @@ pub enum ContainerEvent {
 pub enum ContainerNoOpReason {
     /// No tab with the addressed id exists.
     UnknownTab,
+    /// The requested strip position does not exist; the core never clamps.
+    IndexOutOfRange,
 }
 
 impl ContainerNoOpReason {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::UnknownTab => "unknown_tab",
+            Self::IndexOutOfRange => "index_out_of_range",
         }
     }
 }
@@ -50,7 +56,7 @@ pub struct TabSummary {
 pub struct ContainerView {
     /// The active tab's id, or `None` when the container is empty.
     pub active_id: Option<u64>,
-    /// All tabs in creation order.
+    /// All tabs in strip order (creation order, as adjusted by reordering).
     pub tabs: Vec<TabSummary>,
 }
 
@@ -119,6 +125,7 @@ impl TabContainer {
             ContainerEvent::CloseTab(id) => self.close_tab(id),
             ContainerEvent::Activate(id) => self.activate(id),
             ContainerEvent::Tab(id, tab_event) => self.route(id, tab_event),
+            ContainerEvent::MoveTab(id, to_index) => self.move_tab(id, to_index),
         }
     }
 
@@ -182,6 +189,26 @@ impl TabContainer {
         };
         let outcome = self.slots[index].machine.handle(tab_event);
         self.finish(outcome.effect.clone(), Some(outcome), None)
+    }
+
+    fn move_tab(&mut self, id: u64, to_index: usize) -> ContainerOutcome {
+        let Some(from) = self.slot_index(id) else {
+            return self.finish(TabEffect::None, None, Some(ContainerNoOpReason::UnknownTab));
+        };
+        if to_index >= self.slots.len() {
+            return self.finish(
+                TabEffect::None,
+                None,
+                Some(ContainerNoOpReason::IndexOutOfRange),
+            );
+        }
+        if from != to_index {
+            // Position is the only thing that changes: identity, load state,
+            // and history move with the slot, and activation follows the id.
+            let slot = self.slots.remove(from);
+            self.slots.insert(to_index, slot);
+        }
+        self.finish(TabEffect::None, None, None)
     }
 
     fn slot_index(&self, id: u64) -> Option<usize> {
