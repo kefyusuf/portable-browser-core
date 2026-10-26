@@ -36,5 +36,6 @@ The Cargo.lock file is checked in. CI uses --locked to reject unrecorded depende
 - **M1:** Navigation resolver and deterministic golden cases — **DONE** (accepted and merged 2026-10-25).
 - **M2:** Tab state machine — **DONE** (accepted and merged 2026-10-25; PR #2, head `fb1a22c`).
 - **M3:** Tab container — **DONE** (accepted and merged 2026-10-26; PR #3, head `8afca7f`).
+- **M4:** Tab reordering — **IN REVIEW**: implementation and golden fixtures on [PR #4](https://github.com/kefyusuf/portable-browser-core/pull/4) ([milestone](docs/milestones/M4-tab-reordering.md), [ADR-007](docs/decisions/ADR-007-tab-reordering.md)).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.
