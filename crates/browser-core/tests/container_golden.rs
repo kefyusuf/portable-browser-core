@@ -36,7 +36,7 @@ fn assert_view(view: &ContainerView, cell: &str, row: usize) {
     assert_eq!(cells.len(), view.tabs.len(), "tab count at row {row}");
     for (cell, summary) in cells.iter().zip(view.tabs.iter()) {
         let parts: Vec<&str> = cell.split('|').collect();
-        assert_eq!(parts.len(), 6, "tab cell arity at row {row}");
+        assert_eq!(parts.len(), 7, "tab cell arity at row {row}");
         assert_eq!(
             summary.id,
             parts[0]
@@ -75,6 +75,11 @@ fn assert_view(view: &ContainerView, cell: &str, row: usize) {
             summary.is_active,
             Some(summary.id) == expected_active,
             "is_active at row {row}"
+        );
+        assert_eq!(
+            summary.title.as_deref(),
+            expected_option(parts[6]),
+            "title at row {row}"
         );
     }
 }
@@ -160,6 +165,13 @@ fn parse_container_event(event: &str, arg: &str, row: usize) -> ContainerEvent {
                 .unwrap_or_else(|_| panic!("bad move index at row {row}")),
         );
     }
+    if let Some(id) = event.strip_prefix("set_title:") {
+        return ContainerEvent::SetTitle(
+            id.parse()
+                .unwrap_or_else(|_| panic!("bad set_title id at row {row}")),
+            expected_option(arg).map(str::to_owned),
+        );
+    }
     panic!("unknown container event {event:?} at row {row}");
 }
 
@@ -205,8 +217,8 @@ fn container_golden_matrix() {
         checked += 1;
     }
 
-    assert_eq!(scenario_count, 9, "fixture scenario count drift");
-    assert_eq!(checked, 44, "fixture row count drift");
+    assert_eq!(scenario_count, 13, "fixture scenario count drift");
+    assert_eq!(checked, 59, "fixture row count drift");
 }
 
 #[test]
@@ -317,4 +329,26 @@ fn reorder_moves_load_state_with_the_identity() {
         .expect("tab 1 exists");
     assert_eq!(moved.state.phase, TabPhase::Loading);
     assert_eq!(moved.state.pending_url.as_deref(), Some("https://a.test/"));
+}
+
+#[test]
+fn title_persists_across_navigation_until_reported() {
+    // ADR-008: the title is the last host-reported value; navigation never
+    // alters or clears it.
+    let mut container = TabContainer::new();
+    container.handle(ContainerEvent::NewTab(Some("https://a.test/".into())));
+    container.handle(ContainerEvent::Tab(1, TabEvent::Commit));
+    container.handle(ContainerEvent::SetTitle(1, Some("Example Domain".into())));
+    container.handle(ContainerEvent::Tab(
+        1,
+        TabEvent::Navigate("https://b.test/".into()),
+    ));
+    let outcome = container.handle(ContainerEvent::Tab(1, TabEvent::Commit));
+    let tab = outcome.view.tabs.first().expect("tab 1 exists");
+    assert_eq!(tab.state.current_url.as_deref(), Some("https://b.test/"));
+    assert_eq!(tab.title.as_deref(), Some("Example Domain"));
+
+    let outcome = container.handle(ContainerEvent::SetTitle(1, None));
+    let tab = outcome.view.tabs.first().expect("tab 1 exists");
+    assert_eq!(tab.title, None);
 }
