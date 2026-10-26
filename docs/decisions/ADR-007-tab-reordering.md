@@ -1,6 +1,6 @@
 # ADR-007 — M4 tab reordering
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead for the a–e sequence); implemented on `feat/m4-tab-reorder`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #4, accepted head `81d5b72`, CI run 40402568215). See the M4 milestone for the evidence index.
 
 ## Context
 
