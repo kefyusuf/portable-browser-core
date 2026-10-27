@@ -1,0 +1,23 @@
+# scenario<TAB>step<TAB>event<TAB>arg<TAB>expected_view<TAB>expected_effect<TAB>expected_noop
+# ADR-010: one scenario replays on a fresh workspace; rows assert the full public view per step.
+# event: new_window | close_w:<id> | activate_w:<id> | win:<id>:<container event> (container grammar: new_tab | close:<id> | activate:<id> | tab:<tid>:<inner> | move:<tid>:<idx> | set_title:<tid>; arg = url/title or -)
+# view: active_w=<id or ->|wins=<id>:<inner active tab id or ->,...   (wins=- when empty)
+window_lifecycle_and_close_policy	1	new_window	-	active_w=1|wins=1:-	none	-
+window_lifecycle_and_close_policy	2	new_window	-	active_w=2|wins=1:-,2:-	none	-
+window_lifecycle_and_close_policy	3	new_window	-	active_w=3|wins=1:-,2:-,3:-	none	-
+window_lifecycle_and_close_policy	4	activate_w:1	-	active_w=1|wins=1:-,2:-,3:-	none	-
+window_lifecycle_and_close_policy	5	close_w:1	-	active_w=2|wins=2:-,3:-	none	-
+window_lifecycle_and_close_policy	6	close_w:2	-	active_w=3|wins=3:-	none	-
+window_lifecycle_and_close_policy	7	close_w:3	-	active_w=-|wins=-	none	-
+routed_navigation_and_switching	1	new_window	-	active_w=1|wins=1:-	none	-
+routed_navigation_and_switching	2	new_window	-	active_w=2|wins=1:-,2:-	none	-
+routed_navigation_and_switching	3	win:1:new_tab	https://a.test/	active_w=2|wins=1:1,2:-	start_load|https://a.test/	-
+routed_navigation_and_switching	4	win:1:tab:1:commit	-	active_w=2|wins=1:1,2:-	none	-
+routed_navigation_and_switching	5	activate_w:1	-	active_w=1|wins=1:1,2:-	none	-
+routed_navigation_and_switching	6	win:2:new_tab	https://b.test/	active_w=1|wins=1:1,2:1	start_load|https://b.test/	-
+routed_navigation_and_switching	7	activate_w:2	-	active_w=2|wins=1:1,2:1	none	-
+unknown_window_ids	1	close_w:9	-	active_w=-|wins=-	none	unknown_window
+unknown_window_ids	2	activate_w:9	-	active_w=-|wins=-	none	unknown_window
+unknown_window_ids	3	win:9:new_tab	-	active_w=-|wins=-	none	unknown_window
+close_last_window_to_empty	1	new_window	-	active_w=1|wins=1:-	none	-
+close_last_window_to_empty	2	close_w:1	-	active_w=-|wins=-	none	-
