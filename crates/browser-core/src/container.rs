@@ -263,7 +263,7 @@ impl TabContainer {
     }
 }
 
-const SESSION_MAGIC: &str = "browser-core-session\t1";
+pub(crate) const SESSION_MAGIC: &str = "browser-core-session\t1";
 
 /// Why session text could not be parsed.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

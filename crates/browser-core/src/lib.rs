@@ -18,5 +18,5 @@ pub use tab::{
 };
 pub use workspace::{
     WindowSummary, Workspace, WorkspaceEvent, WorkspaceNoOpReason, WorkspaceOutcome,
-    WorkspaceSessionError, WorkspaceView,
+    WorkspaceParseError, WorkspaceSessionError, WorkspaceView,
 };
