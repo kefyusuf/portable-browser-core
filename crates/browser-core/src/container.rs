@@ -22,6 +22,10 @@ pub enum ContainerEvent {
     /// Reposition the addressed tab so it sits at the target index
     /// (0-based) afterwards. Ids, load state, and history are untouched.
     MoveTab(u64, usize),
+    /// Set or clear the addressed tab's host-reported display title. The
+    /// last reported value is kept until the next report; navigation never
+    /// alters it.
+    SetTitle(u64, Option<String>),
 }
 
 /// Why a container event produced no transition. The container is total:
@@ -49,6 +53,9 @@ pub struct TabSummary {
     pub id: u64,
     pub is_active: bool,
     pub state: TabStateView,
+    /// The last host-reported display title, if any. The core never invents
+    /// one; navigation does not clear it.
+    pub title: Option<String>,
 }
 
 /// A read-only view of the container for hosts and fixtures.
@@ -75,6 +82,7 @@ pub struct ContainerOutcome {
 struct Slot {
     id: u64,
     machine: TabMachine,
+    title: Option<String>,
 }
 
 /// A single-window ordered tab set over M2 machines.
@@ -114,6 +122,7 @@ impl TabContainer {
                     id: slot.id,
                     is_active: self.active == Some(slot.id),
                     state: slot.machine.state(),
+                    title: slot.title.clone(),
                 })
                 .collect(),
         }
@@ -126,6 +135,7 @@ impl TabContainer {
             ContainerEvent::Activate(id) => self.activate(id),
             ContainerEvent::Tab(id, tab_event) => self.route(id, tab_event),
             ContainerEvent::MoveTab(id, to_index) => self.move_tab(id, to_index),
+            ContainerEvent::SetTitle(id, title) => self.set_title(id, title),
         }
     }
 
@@ -135,6 +145,7 @@ impl TabContainer {
         self.slots.push(Slot {
             id,
             machine: TabMachine::new(),
+            title: None,
         });
         self.active = Some(id);
 
@@ -208,6 +219,14 @@ impl TabContainer {
             let slot = self.slots.remove(from);
             self.slots.insert(to_index, slot);
         }
+        self.finish(TabEffect::None, None, None)
+    }
+
+    fn set_title(&mut self, id: u64, title: Option<String>) -> ContainerOutcome {
+        let Some(index) = self.slot_index(id) else {
+            return self.finish(TabEffect::None, None, Some(ContainerNoOpReason::UnknownTab));
+        };
+        self.slots[index].title = title;
         self.finish(TabEffect::None, None, None)
     }
 
