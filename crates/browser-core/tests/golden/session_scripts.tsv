@@ -1,0 +1,21 @@
+# scenario<TAB>step<TAB>event<TAB>arg
+# ADR-009: one scenario replays on a fresh container; the harness then asserts
+# the full round-trip: to_session_text -> from_session_text -> same view and
+# identical re-serialization. Exact format bytes are pinned in session_golden.rs.
+roundtrip_full_history_and_titles	1	new_tab	https://a.test/
+roundtrip_full_history_and_titles	2	tab:1:commit	-
+roundtrip_full_history_and_titles	3	tab:1:navigate	https://b.test/
+roundtrip_full_history_and_titles	4	tab:1:commit	-
+roundtrip_full_history_and_titles	5	set_title:1	Example Domain
+roundtrip_full_history_and_titles	6	new_tab	-
+roundtrip_pending_kinds	1	new_tab	https://a.test/
+roundtrip_pending_kinds	2	new_tab	https://b.test/
+roundtrip_pending_kinds	3	tab:1:commit	-
+roundtrip_pending_kinds	4	tab:2:commit	-
+roundtrip_pending_kinds	5	tab:2:reload	-
+roundtrip_strip_order_and_titles	1	new_tab	-
+roundtrip_strip_order_and_titles	2	new_tab	-
+roundtrip_strip_order_and_titles	3	move:2:0	-
+roundtrip_strip_order_and_titles	4	set_title:2	Moved
+roundtrip_close_to_empty	1	new_tab	https://a.test/
+roundtrip_close_to_empty	2	close:1	-

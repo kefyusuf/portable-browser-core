@@ -93,6 +93,34 @@ enum PendingTarget {
     Reload,
 }
 
+/// The pending target of a snapshot, preserving the fresh/reload
+/// distinction that changes what a later `commit` does.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum PendingSnapshot {
+    Fresh(String),
+    Reload,
+}
+
+/// A complete, read-only snapshot of a tab machine's state, sufficient to
+/// restore an equivalent machine.
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct TabSnapshot {
+    /// Full history, oldest first.
+    pub entries: Vec<String>,
+    pub cursor: Option<usize>,
+    pub pending: Option<PendingSnapshot>,
+}
+
+/// Why a snapshot could not be restored.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SnapshotError;
+
+impl SnapshotError {
+    pub const fn as_str(self) -> &'static str {
+        "invalid_snapshot"
+    }
+}
+
 /// A single tab's navigation lifecycle and session history.
 ///
 /// Deterministic: the same event sequence over the same initial state yields
@@ -108,6 +136,39 @@ pub struct TabMachine {
 impl TabMachine {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// The complete machine state. Serialization needs internals the view
+    /// intentionally hides (history beyond the cursor, pending kind).
+    pub fn snapshot(&self) -> TabSnapshot {
+        TabSnapshot {
+            entries: self.entries.clone(),
+            cursor: self.cursor,
+            pending: self.pending.as_ref().map(|pending| match pending {
+                PendingTarget::Fresh(url) => PendingSnapshot::Fresh(url.clone()),
+                PendingTarget::Reload => PendingSnapshot::Reload,
+            }),
+        }
+    }
+
+    /// Restores a machine from a snapshot. Validated, never panics.
+    pub fn from_snapshot(snapshot: TabSnapshot) -> Result<Self, SnapshotError> {
+        if let Some(cursor) = snapshot.cursor {
+            if cursor >= snapshot.entries.len() {
+                return Err(SnapshotError);
+            }
+        }
+        if matches!(snapshot.pending, Some(PendingSnapshot::Reload)) && snapshot.cursor.is_none() {
+            return Err(SnapshotError);
+        }
+        Ok(Self {
+            entries: snapshot.entries,
+            cursor: snapshot.cursor,
+            pending: snapshot.pending.map(|pending| match pending {
+                PendingSnapshot::Fresh(url) => PendingTarget::Fresh(url),
+                PendingSnapshot::Reload => PendingTarget::Reload,
+            }),
+        })
     }
 
     pub fn state(&self) -> TabStateView {
