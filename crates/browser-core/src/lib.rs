@@ -5,6 +5,7 @@
 pub mod container;
 pub mod navigation;
 pub mod tab;
+pub mod workspace;
 
 pub use container::{
     ContainerEvent, ContainerNoOpReason, ContainerOutcome, ContainerView, SessionParseError,
@@ -14,4 +15,7 @@ pub use navigation::{resolve_navigation, NavigationDecision, RejectionReason};
 pub use tab::{
     NoOpReason, PendingSnapshot, SnapshotError, TabEffect, TabEvent, TabMachine, TabOutcome,
     TabPhase, TabSnapshot, TabStateView,
+};
+pub use workspace::{
+    WindowSummary, Workspace, WorkspaceEvent, WorkspaceNoOpReason, WorkspaceOutcome, WorkspaceView,
 };
