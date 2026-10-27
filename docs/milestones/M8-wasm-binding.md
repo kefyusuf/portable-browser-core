@@ -1,6 +1,6 @@
 # M8 — WASM host binding
 
-**State: IMPLEMENTING** — ADR-011 accepted 2026-10-27; implementation on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-27.
 
 ## Deliverable
 
@@ -16,8 +16,8 @@ A thin, decision-free JavaScript bridge over the existing core: a new `crates/br
 - [x] Session text passthrough exposed (per window: `containerSessionText`/`containerSetSessionText`) so M6 persistence works unchanged over the bridge.
 - [x] The binding layer contains zero policy: every decision remains in `browser-core`; JS glue only converts types.
 - [x] wasm-bindgen-test suite running in Node on Ubuntu CI covers: navigation classification, workspace lifecycle, effect surfacing, no-op reasons (innermost reason surfaced), and session passthrough.
-- [ ] CI green bound to the final exact PR head: existing 3-OS Rust gates unchanged, plus the new Ubuntu wasm steps (cdylib build + Node test run).
-- [ ] Independent acceptance of ADR-011 for the final exact HEAD.
+- [x] CI green bound to the final exact PR head: existing 3-OS Rust gates unchanged, plus the new Ubuntu wasm steps (cdylib build + Node test run). *(Core CI run [40577399591](https://github.com/kefyusuf/portable-browser-core/actions/runs/40577399591) PASS on head `fec6208`; all three Ubuntu WASM steps success.)*
+- [x] Independent acceptance of ADR-011 for the final exact HEAD. *(Maintainer accepted 2026-10-27 by approving the merge of PR #8. Semantics acceptance recorded 2026-10-27 as item (e) of the approved a–e sequence; the local Windows verification record — including a local Node run of the binding suite — is in the PR evidence comment.)*
 
 ## Baseline/provenance
 

@@ -1,6 +1,6 @@
 # ADR-011 — M8 WASM host binding
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead); implemented with a Node-executed `wasm-bindgen-test` suite on `feat/m8-wasm-binding`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #8, accepted head `fec6208`, CI run 40577399591). See the M8 milestone for the evidence index.
 
 ## Context
 
