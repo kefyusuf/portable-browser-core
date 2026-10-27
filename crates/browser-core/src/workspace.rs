@@ -65,6 +65,24 @@ pub struct WorkspaceOutcome {
     pub noop: Option<WorkspaceNoOpReason>,
 }
 
+/// Why a window-scoped session operation failed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum WorkspaceSessionError {
+    /// No window with the addressed id exists.
+    UnknownWindow,
+    /// The session text was rejected by the M6 parser.
+    MalformedSession,
+}
+
+impl WorkspaceSessionError {
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::UnknownWindow => "unknown_window",
+            Self::MalformedSession => "malformed_session",
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct WindowSlot {
     id: u64,
@@ -178,6 +196,29 @@ impl Workspace {
         };
         let outcome = self.windows[index].container.handle(container_event);
         self.finish(outcome.effect.clone(), Some(outcome), None)
+    }
+
+    /// The M6 session text of the addressed window's container, or `None`
+    /// when the window does not exist. Pure access for host bridges.
+    pub fn container_session_text(&self, window: u64) -> Option<String> {
+        let index = self.window_index(window)?;
+        Some(self.windows[index].container.to_session_text())
+    }
+
+    /// Replaces the addressed window's container with one parsed from M6
+    /// session text. Pure; the new container starts with no pending outcome.
+    pub fn set_container_session_text(
+        &mut self,
+        window: u64,
+        text: &str,
+    ) -> Result<(), WorkspaceSessionError> {
+        let index = self
+            .window_index(window)
+            .ok_or(WorkspaceSessionError::UnknownWindow)?;
+        let container = TabContainer::from_session_text(text)
+            .map_err(|_| WorkspaceSessionError::MalformedSession)?;
+        self.windows[index].container = container;
+        Ok(())
     }
 
     fn window_index(&self, id: u64) -> Option<usize> {

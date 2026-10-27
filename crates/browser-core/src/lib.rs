@@ -17,5 +17,6 @@ pub use tab::{
     TabPhase, TabSnapshot, TabStateView,
 };
 pub use workspace::{
-    WindowSummary, Workspace, WorkspaceEvent, WorkspaceNoOpReason, WorkspaceOutcome, WorkspaceView,
+    WindowSummary, Workspace, WorkspaceEvent, WorkspaceNoOpReason, WorkspaceOutcome,
+    WorkspaceSessionError, WorkspaceView,
 };
