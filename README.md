@@ -40,6 +40,6 @@ The Cargo.lock file is checked in. CI uses --locked to reject unrecorded depende
 - **M5:** Host-reported tab titles — **DONE** (accepted and merged 2026-10-27; PR #5, head `69fab1f`).
 - **M6:** Session persistence — **DONE** (accepted and merged 2026-10-27; PR #6, head `d4dd983`).
 - **M7:** Window set (workspace) — **DONE** (accepted and merged 2026-10-27; PR #7, head `caa01b9`).
-- **M8:** WASM host binding — **PROPOSED**: docs-first design on [PR #8](https://github.com/kefyusuf/portable-browser-core/pull/8) ([milestone](docs/milestones/M8-wasm-binding.md), [ADR-011](docs/decisions/ADR-011-wasm-binding.md)); first stop-boundary extension, needs maintainer acceptance.
+- **M8:** WASM host binding — **IN REVIEW**: implementation and Node-executed tests on [PR #8](https://github.com/kefyusuf/portable-browser-core/pull/8) ([milestone](docs/milestones/M8-wasm-binding.md), [ADR-011](docs/decisions/ADR-011-wasm-binding.md)).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.

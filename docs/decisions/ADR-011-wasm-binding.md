@@ -1,6 +1,6 @@
 # ADR-011 — M8 WASM host binding
 
-**Status:** Proposed for M8 — this ADR extends the core's stop-boundary for the first time, so it requires explicit maintainer acceptance before implementation.
+**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead); implemented with a Node-executed `wasm-bindgen-test` suite on `feat/m8-wasm-binding`. Milestone evidence (multi-platform CI and independent acceptance) pending.
 
 ## Context
 
@@ -18,6 +18,7 @@ The core is pure Rust: deterministic decisions, no I/O, WASM-compilable since M1
 - **Boundary restated for the host language.** `resolve_navigation` returning a URL and `effect: { type: "start_load" }` are **requests**. The JS host owns DNS, fetches, redirects, and execution — exactly as ADR-004 states for Rust hosts. Nothing in the binding performs I/O.
 - **CI extension.** The existing 3-OS Rust gates stay untouched. On Ubuntu, Core CI additionally: (1) builds the cdylib for `wasm32-unknown-unknown`; (2) installs `wasm-bindgen-cli` pinned to the same `0.2.129` and runs a `wasm-bindgen-test` suite in **Node** covering navigation classification, workspace lifecycle, effect surfacing, no-op reasons, and session passthrough. WASM moves from *compilation-only* evidence to *executed* evidence for the binding layer.
 - **Determinism unchanged.** The bridge is synchronous and stateless between calls; the same method sequence on a fresh `WorkspaceBinding` yields identical snapshots on every platform and in every JS runtime.
+- **Implementation refinements (recorded 2026-10-27 at implementation time):** the session passthrough is exposed per window as `containerSessionText(window)` / `containerSetSessionText(window, text)` because the M6 format is per-container; a workspace-level session format remains future work. On routed events the surfaced `noop` is the **innermost** reason that explains the non-transition — tab machine (`at_boundary`, `unexpected_event`, `nothing_to_reload`), then container (`unknown_tab`, `index_out_of_range`, `invalid_title`), then workspace (`unknown_window`) — so the bridge's total semantics hold at every layer.
 
 ## Explicitly out of scope
 
