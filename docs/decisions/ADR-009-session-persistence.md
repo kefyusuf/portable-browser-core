@@ -1,6 +1,6 @@
 # ADR-009 — M6 session persistence
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead for the a–e sequence, item c); implemented on `feat/m6-session-persistence`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #6, accepted head `d4dd983`, CI run 40529844209). See the M6 milestone for the evidence index.
 
 ## Context
 

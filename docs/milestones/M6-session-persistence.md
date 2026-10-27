@@ -1,6 +1,6 @@
 # M6 — Session persistence (snapshot and restore)
 
-**State: IMPLEMENTING** — semantics accepted 2026-10-27; implementation and fixtures on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-27.
 
 ## Deliverable
 
@@ -16,8 +16,8 @@ A deterministic, dependency-free text serialization of the whole container (`Tab
 - [x] Serialization adds no dependency (no serde, no I/O in the core).
 - [x] `SetTitle` now rejects control-character titles (C0/DEL) as `invalid_title` no-ops — a persistence prerequisite documented in ADR-009.
 - [x] Golden round-trip scenarios exist with exact-count drift guards, plus a pinned exact-format test (4 scenarios, 17 steps; source inspection until CI).
-- [ ] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head.
-- [ ] Independent acceptance of ADR-009 semantics for the final exact HEAD.
+- [x] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head. *(Core CI run [40529844209](https://github.com/kefyusuf/portable-browser-core/actions/runs/40529844209) PASS on head `d4dd983`.)*
+- [x] Independent acceptance of ADR-009 semantics for the final exact HEAD. *(Maintainer accepted 2026-10-27 by approving the merge of PR #6. Semantics acceptance recorded 2026-10-27 as item (c) of the approved a–e sequence; the local Windows verification record is in the PR evidence comment.)*
 
 ## Baseline/provenance
 
