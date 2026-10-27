@@ -7,7 +7,11 @@ pub mod navigation;
 pub mod tab;
 
 pub use container::{
-    ContainerEvent, ContainerNoOpReason, ContainerOutcome, ContainerView, TabContainer, TabSummary,
+    ContainerEvent, ContainerNoOpReason, ContainerOutcome, ContainerView, SessionParseError,
+    TabContainer, TabSummary,
 };
 pub use navigation::{resolve_navigation, NavigationDecision, RejectionReason};
-pub use tab::{NoOpReason, TabEffect, TabEvent, TabMachine, TabOutcome, TabPhase, TabStateView};
+pub use tab::{
+    NoOpReason, PendingSnapshot, SnapshotError, TabEffect, TabEvent, TabMachine, TabOutcome,
+    TabPhase, TabSnapshot, TabStateView,
+};

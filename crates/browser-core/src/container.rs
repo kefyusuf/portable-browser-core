@@ -5,7 +5,9 @@
 //! activation, and id-addressed routing of M2 tab events so background tabs
 //! can report load outcomes. The container never performs a load.
 
-use super::tab::{TabEffect, TabEvent, TabMachine, TabOutcome, TabStateView};
+use super::tab::{
+    PendingSnapshot, TabEffect, TabEvent, TabMachine, TabOutcome, TabSnapshot, TabStateView,
+};
 
 /// An event the host submits to the tab container.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -36,6 +38,8 @@ pub enum ContainerNoOpReason {
     UnknownTab,
     /// The requested strip position does not exist; the core never clamps.
     IndexOutOfRange,
+    /// The reported title contains an ASCII control byte (C0 or DEL).
+    InvalidTitle,
 }
 
 impl ContainerNoOpReason {
@@ -43,6 +47,7 @@ impl ContainerNoOpReason {
         match self {
             Self::UnknownTab => "unknown_tab",
             Self::IndexOutOfRange => "index_out_of_range",
+            Self::InvalidTitle => "invalid_title",
         }
     }
 }
@@ -226,6 +231,15 @@ impl TabContainer {
         let Some(index) = self.slot_index(id) else {
             return self.finish(TabEffect::None, None, Some(ContainerNoOpReason::UnknownTab));
         };
+        if let Some(title) = &title {
+            if title.bytes().any(|byte| byte.is_ascii_control()) {
+                return self.finish(
+                    TabEffect::None,
+                    None,
+                    Some(ContainerNoOpReason::InvalidTitle),
+                );
+            }
+        }
         self.slots[index].title = title;
         self.finish(TabEffect::None, None, None)
     }
@@ -246,5 +260,199 @@ impl TabContainer {
             tab_outcome,
             noop,
         }
+    }
+}
+
+const SESSION_MAGIC: &str = "browser-core-session\t1";
+
+/// Why session text could not be parsed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SessionParseError;
+
+impl SessionParseError {
+    pub const fn as_str(self) -> &'static str {
+        "malformed_session"
+    }
+}
+
+fn escape_field(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for character in value.chars() {
+        match character {
+            '\\' => out.push_str("\\\\"),
+            '\t' => out.push_str("\\t"),
+            '\r' => out.push_str("\\r"),
+            '\n' => out.push_str("\\n"),
+            other => out.push(other),
+        }
+    }
+    out
+}
+
+fn unescape_field(value: &str) -> Option<String> {
+    let mut out = String::with_capacity(value.len());
+    let mut characters = value.chars();
+    while let Some(character) = characters.next() {
+        if character != '\\' {
+            out.push(character);
+            continue;
+        }
+        match characters.next()? {
+            '\\' => out.push('\\'),
+            't' => out.push('\t'),
+            'r' => out.push('\r'),
+            'n' => out.push('\n'),
+            _ => return None,
+        }
+    }
+    Some(out)
+}
+
+fn write_title_field(out: &mut String, title: Option<&str>) {
+    match title {
+        None => out.push('-'),
+        Some(title) => {
+            out.push_str("t:");
+            out.push_str(&escape_field(title));
+        }
+    }
+}
+
+fn parse_title_field(field: &str) -> Result<Option<String>, SessionParseError> {
+    match field {
+        "-" => Ok(None),
+        rest => {
+            let escaped = rest.strip_prefix("t:").ok_or(SessionParseError)?.to_owned();
+            Ok(Some(unescape_field(&escaped).ok_or(SessionParseError)?))
+        }
+    }
+}
+
+impl TabContainer {
+    /// Serializes the complete container state to deterministic text. The
+    /// core performs no I/O; hosts own reading and writing the bytes.
+    pub fn to_session_text(&self) -> String {
+        let mut out = String::new();
+        out.push_str(SESSION_MAGIC);
+        out.push('\n');
+        out.push_str("header\t");
+        out.push_str(&self.slots.len().to_string());
+        out.push('\t');
+        out.push_str(&self.next_id.to_string());
+        out.push('\t');
+        match self.active {
+            Some(id) => out.push_str(&id.to_string()),
+            None => out.push('-'),
+        }
+        out.push('\n');
+        for slot in &self.slots {
+            let snapshot = slot.machine.snapshot();
+            out.push_str("tab\t");
+            out.push_str(&slot.id.to_string());
+            out.push('\t');
+            write_title_field(&mut out, slot.title.as_deref());
+            out.push('\t');
+            match snapshot.cursor {
+                Some(cursor) => out.push_str(&cursor.to_string()),
+                None => out.push('-'),
+            }
+            out.push('\t');
+            match snapshot.pending {
+                None => out.push('-'),
+                Some(PendingSnapshot::Reload) => out.push_str("reload"),
+                Some(PendingSnapshot::Fresh(url)) => {
+                    out.push_str("fresh:");
+                    out.push_str(&escape_field(&url));
+                }
+            }
+            for entry in &snapshot.entries {
+                out.push('\t');
+                out.push_str(&escape_field(entry));
+            }
+            out.push('\n');
+        }
+        out
+    }
+
+    /// Parses session text produced by `to_session_text`. Validating and
+    /// total: malformed input yields `SessionParseError`, never a panic.
+    pub fn from_session_text(text: &str) -> Result<Self, SessionParseError> {
+        let mut lines: Vec<&str> = text.split('\n').collect();
+        if lines.last() == Some(&"") {
+            lines.pop();
+        }
+
+        if lines.first() != Some(&SESSION_MAGIC) {
+            return Err(SessionParseError);
+        }
+
+        let header: Vec<&str> = lines.get(1).ok_or(SessionParseError)?.split('\t').collect();
+        if header.len() != 4 || header[0] != "header" {
+            return Err(SessionParseError);
+        }
+        let tab_count: usize = header[1].parse().map_err(|_| SessionParseError)?;
+        let next_id: u64 = header[2].parse().map_err(|_| SessionParseError)?;
+        let active: Option<u64> = match header[3] {
+            "-" => None,
+            value => Some(value.parse().map_err(|_| SessionParseError)?),
+        };
+
+        let mut slots = Vec::with_capacity(tab_count);
+        for line in lines.iter().skip(2) {
+            let fields: Vec<&str> = line.split('\t').collect();
+            if fields.len() < 5 || fields[0] != "tab" {
+                return Err(SessionParseError);
+            }
+            let id: u64 = fields[1].parse().map_err(|_| SessionParseError)?;
+            if slots.iter().any(|slot: &Slot| slot.id == id) || id >= next_id {
+                return Err(SessionParseError);
+            }
+            let title = parse_title_field(fields[2])?;
+            let cursor: Option<usize> = match fields[3] {
+                "-" => None,
+                value => Some(value.parse().map_err(|_| SessionParseError)?),
+            };
+            let pending: Option<PendingSnapshot> = match fields[4] {
+                "-" => None,
+                "reload" => Some(PendingSnapshot::Reload),
+                value => {
+                    let escaped = value
+                        .strip_prefix("fresh:")
+                        .ok_or(SessionParseError)?
+                        .to_owned();
+                    Some(PendingSnapshot::Fresh(
+                        unescape_field(&escaped).ok_or(SessionParseError)?,
+                    ))
+                }
+            };
+            let entries: Vec<String> = fields[5..]
+                .iter()
+                .map(|field| unescape_field(field).ok_or(SessionParseError))
+                .collect::<Result<_, _>>()?;
+            let machine = TabMachine::from_snapshot(TabSnapshot {
+                entries,
+                cursor,
+                pending,
+            })
+            .map_err(|_| SessionParseError)?;
+            slots.push(Slot { id, machine, title });
+        }
+
+        if slots.len() != tab_count {
+            return Err(SessionParseError);
+        }
+        match active {
+            None if !slots.is_empty() => return Err(SessionParseError),
+            Some(id) if !slots.iter().any(|slot| slot.id == id) => {
+                return Err(SessionParseError);
+            }
+            _ => {}
+        }
+
+        Ok(Self {
+            slots,
+            active,
+            next_id,
+        })
     }
 }
