@@ -1,6 +1,6 @@
 # M7 — Window set (workspace)
 
-**State: IMPLEMENTING** — semantics accepted 2026-10-27; implementation and fixtures on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-27.
 
 ## Deliverable
 
@@ -16,8 +16,8 @@ A pure, deterministic ordered set of M3 containers ("windows") with deterministi
 - [x] Events addressing a nonexistent window are reasoned no-ops (`unknown_window`); window activation never triggers loads.
 - [x] The workspace view exposes ordered window summaries (id, active flag, full container view) plus the active window id.
 - [x] Golden workspace scenarios exist with exact-count drift guards (4 scenarios, 19 steps; source inspection until CI).
-- [ ] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head.
-- [ ] Independent acceptance of ADR-010 semantics for the final exact HEAD.
+- [x] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head. *(Core CI run [40549969877](https://github.com/kefyusuf/portable-browser-core/actions/runs/40549969877) PASS on head `caa01b9`.)*
+- [x] Independent acceptance of ADR-010 semantics for the final exact HEAD. *(Maintainer accepted 2026-10-27 by approving the merge of PR #7. Semantics acceptance recorded 2026-10-27 as item (d) of the approved a–e sequence; the local Windows verification record is in the PR evidence comment.)*
 
 ## Baseline/provenance
 

@@ -1,6 +1,6 @@
 # ADR-010 — M7 window set (workspace)
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead for the a–e sequence, item d); implemented on `feat/m7-workspace`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #7, accepted head `caa01b9`, CI run 40549969877). See the M7 milestone for the evidence index.
 
 ## Context
 
