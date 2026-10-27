@@ -1,3 +1,3 @@
 [workspace]
-members = ["crates/browser-core"]
+members = ["crates/browser-core", "crates/browser-core-wasm"]
 resolver = "2"

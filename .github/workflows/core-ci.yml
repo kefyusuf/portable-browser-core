@@ -33,3 +33,11 @@ jobs:
         run: |
           rustup target add wasm32-unknown-unknown --toolchain 1.98.1
           cargo +1.98.1 check --workspace --locked --target wasm32-unknown-unknown
+      - name: WASM binding cdylib build
+        if: matrix.os == 'ubuntu-latest'
+        run: cargo +1.98.1 build -p browser-core-wasm --locked --target wasm32-unknown-unknown
+      - name: WASM binding tests (Node)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cargo +1.98.1 install wasm-bindgen-cli --version 0.2.129 --locked
+          CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER=wasm-bindgen-test-runner cargo +1.98.1 test -p browser-core-wasm --locked --target wasm32-unknown-unknown
