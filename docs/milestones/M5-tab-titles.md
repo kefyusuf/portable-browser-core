@@ -1,6 +1,6 @@
 # M5 — Host-reported tab titles
 
-**State: IMPLEMENTING** — semantics accepted 2026-10-27; implementation and fixtures on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-27.
 
 ## Deliverable
 
@@ -14,8 +14,8 @@ An extension of the M3 container: per-tab, host-reported display titles held as 
 - [x] Titles travel with tab identity: reorder and activation keep titles with their id; closing a tab discards its title with the slot.
 - [x] New tabs start untitled; the core never invents a title.
 - [x] Golden container scenarios cover set/clear, per-tab independence, reorder/close travel, and unknown ids, with exact-count drift guards (13 scenarios, 59 steps; source inspection until CI).
-- [ ] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head.
-- [ ] Independent acceptance of ADR-008 semantics for the final exact HEAD.
+- [x] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head. *(Core CI run [40406851106](https://github.com/kefyusuf/portable-browser-core/actions/runs/40406851106) PASS on head `69fab1f`.)*
+- [x] Independent acceptance of ADR-008 semantics for the final exact HEAD. *(Maintainer accepted 2026-10-27 by approving the merge of PR #5. Semantics acceptance recorded 2026-10-27 as item (b) of the approved a–e sequence; the local Windows verification record is in the PR evidence comment.)*
 
 ## Baseline/provenance
 

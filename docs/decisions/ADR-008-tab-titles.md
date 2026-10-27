@@ -1,6 +1,6 @@
 # ADR-008 — M5 host-reported tab titles
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead for the a–e sequence, item b); implemented on `feat/m5-tab-titles`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #5, accepted head `69fab1f`, CI run 40406851106). See the M5 milestone for the evidence index. ADR-009 later adds a validation rule to `SetTitle` (control-character titles are rejected) as a persistence prerequisite.
 
 ## Context
 

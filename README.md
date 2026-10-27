@@ -37,6 +37,6 @@ The Cargo.lock file is checked in. CI uses --locked to reject unrecorded depende
 - **M2:** Tab state machine — **DONE** (accepted and merged 2026-10-25; PR #2, head `fb1a22c`).
 - **M3:** Tab container — **DONE** (accepted and merged 2026-10-26; PR #3, head `8afca7f`).
 - **M4:** Tab reordering — **DONE** (accepted and merged 2026-10-27; PR #4, head `81d5b72`).
-- **M5:** Host-reported tab titles — **IN REVIEW**: implementation and golden fixtures on [PR #5](https://github.com/kefyusuf/portable-browser-core/pull/5) ([milestone](docs/milestones/M5-tab-titles.md), [ADR-008](docs/decisions/ADR-008-tab-titles.md)).
+- **M5:** Host-reported tab titles — **DONE** (accepted and merged 2026-10-27; PR #5, head `69fab1f`).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.
