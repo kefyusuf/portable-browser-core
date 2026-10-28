@@ -13,8 +13,8 @@ pub use container::{
 };
 pub use navigation::{resolve_navigation, NavigationDecision, RejectionReason};
 pub use tab::{
-    NoOpReason, PendingSnapshot, SnapshotError, TabEffect, TabEvent, TabMachine, TabOutcome,
-    TabPhase, TabSnapshot, TabStateView,
+    EntrySnapshot, NoOpReason, PendingSnapshot, SnapshotError, TabEffect, TabEvent, TabMachine,
+    TabOutcome, TabPhase, TabSnapshot, TabStateView,
 };
 pub use workspace::{
     WindowSummary, Workspace, WorkspaceEvent, WorkspaceNoOpReason, WorkspaceOutcome,

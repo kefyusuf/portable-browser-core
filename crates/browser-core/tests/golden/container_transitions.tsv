@@ -55,9 +55,10 @@ titles_are_per_tab	2	set_title:1	Page A	active=1|tabs=1|loading|https://a.test/|
 titles_are_per_tab	3	new_tab	https://b.test/	active=2|tabs=1|loading|https://a.test/|-|0|0|Page A,2|loading|https://b.test/|-|0|0|-	start_load|https://b.test/	-
 titles_are_per_tab	4	set_title:2	Page B	active=2|tabs=1|loading|https://a.test/|-|0|0|Page A,2|loading|https://b.test/|-|0|0|Page B	none	-
 titles_are_per_tab	5	activate:1	-	active=1|tabs=1|loading|https://a.test/|-|0|0|Page A,2|loading|https://b.test/|-|0|0|Page B	none	-
-title_travels_with_identity	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-	none	-
-title_travels_with_identity	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	-
-title_travels_with_identity	3	set_title:2	Second	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|Second	none	-
-title_travels_with_identity	4	move:2:0	-	active=2|tabs=2|empty|-|-|0|0|Second,1|empty|-|-|0|0|-	none	-
-title_travels_with_identity	5	close:2	-	active=1|tabs=1|empty|-|-|0|0|-	none	-
+title_travels_with_identity	1	new_tab	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-	start_load|https://a.test/	-
+title_travels_with_identity	2	tab:1:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|-	none	-
+title_travels_with_identity	3	set_title:1	Second	active=1|tabs=1|active|-|https://a.test/|0|0|Second	none	-
+title_travels_with_identity	4	new_tab	-	active=2|tabs=1|active|-|https://a.test/|0|0|Second,2|empty|-|-|0|0|-	none	-
+title_travels_with_identity	5	move:1:1	-	active=2|tabs=2|empty|-|-|0|0|-,1|active|-|https://a.test/|0|0|Second	none	-
+title_travels_with_identity	6	close:2	-	active=1|tabs=1|active|-|https://a.test/|0|0|Second	none	-
 set_title_unknown_tab	1	set_title:9	Ghost	active=-|tabs=-	none	unknown_tab

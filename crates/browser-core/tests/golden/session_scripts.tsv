@@ -14,8 +14,9 @@ roundtrip_pending_kinds	3	tab:1:commit	-
 roundtrip_pending_kinds	4	tab:2:commit	-
 roundtrip_pending_kinds	5	tab:2:reload	-
 roundtrip_strip_order_and_titles	1	new_tab	-
-roundtrip_strip_order_and_titles	2	new_tab	-
-roundtrip_strip_order_and_titles	3	move:2:0	-
-roundtrip_strip_order_and_titles	4	set_title:2	Moved
+roundtrip_strip_order_and_titles	2	new_tab	https://b.test/
+roundtrip_strip_order_and_titles	3	tab:2:commit	-
+roundtrip_strip_order_and_titles	4	move:2:0	-
+roundtrip_strip_order_and_titles	5	set_title:2	Moved
 roundtrip_close_to_empty	1	new_tab	https://a.test/
 roundtrip_close_to_empty	2	close:1	-

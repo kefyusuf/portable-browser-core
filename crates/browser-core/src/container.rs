@@ -6,7 +6,8 @@
 //! can report load outcomes. The container never performs a load.
 
 use super::tab::{
-    PendingSnapshot, TabEffect, TabEvent, TabMachine, TabOutcome, TabSnapshot, TabStateView,
+    EntrySnapshot, NoOpReason, PendingSnapshot, TabEffect, TabEvent, TabMachine, TabOutcome,
+    TabSnapshot, TabStateView,
 };
 
 /// An event the host submits to the tab container.
@@ -40,6 +41,8 @@ pub enum ContainerNoOpReason {
     IndexOutOfRange,
     /// The reported title contains an ASCII control byte (C0 or DEL).
     InvalidTitle,
+    /// There is no history entry to attach a title to (ADR-014).
+    NothingToTitle,
 }
 
 impl ContainerNoOpReason {
@@ -48,6 +51,7 @@ impl ContainerNoOpReason {
             Self::UnknownTab => "unknown_tab",
             Self::IndexOutOfRange => "index_out_of_range",
             Self::InvalidTitle => "invalid_title",
+            Self::NothingToTitle => "nothing_to_title",
         }
     }
 }
@@ -58,8 +62,8 @@ pub struct TabSummary {
     pub id: u64,
     pub is_active: bool,
     pub state: TabStateView,
-    /// The last host-reported display title, if any. The core never invents
-    /// one; navigation does not clear it.
+    /// The displayed title, derived from the machine (ADR-014): the current
+    /// entry's title, or a title reported for the load in flight.
     pub title: Option<String>,
 }
 
@@ -87,7 +91,6 @@ pub struct ContainerOutcome {
 struct Slot {
     id: u64,
     machine: TabMachine,
-    title: Option<String>,
 }
 
 /// A single-window ordered tab set over M2 machines.
@@ -123,11 +126,14 @@ impl TabContainer {
             tabs: self
                 .slots
                 .iter()
-                .map(|slot| TabSummary {
-                    id: slot.id,
-                    is_active: self.active == Some(slot.id),
-                    state: slot.machine.state(),
-                    title: slot.title.clone(),
+                .map(|slot| {
+                    let state = slot.machine.state();
+                    TabSummary {
+                        id: slot.id,
+                        is_active: self.active == Some(slot.id),
+                        title: state.title.clone(),
+                        state,
+                    }
                 })
                 .collect(),
         }
@@ -150,7 +156,6 @@ impl TabContainer {
         self.slots.push(Slot {
             id,
             machine: TabMachine::new(),
-            title: None,
         });
         self.active = Some(id);
 
@@ -240,8 +245,15 @@ impl TabContainer {
                 );
             }
         }
-        self.slots[index].title = title;
-        self.finish(TabEffect::None, None, None)
+        // ADR-014: the title belongs to the machine's history now; the
+        // machine decides which entry (or pending target) it addresses.
+        let outcome = self.slots[index].machine.handle(TabEvent::SetTitle(title));
+        // SetTitle only no-ops as `nothing_to_title` at the machine layer.
+        let noop = outcome
+            .noop
+            .filter(|reason| *reason == NoOpReason::NothingToTitle)
+            .map(|_| ContainerNoOpReason::NothingToTitle);
+        self.finish(TabEffect::None, Some(outcome), noop)
     }
 
     fn slot_index(&self, id: u64) -> Option<usize> {
@@ -263,7 +275,8 @@ impl TabContainer {
     }
 }
 
-pub(crate) const SESSION_MAGIC: &str = "browser-core-session\t1";
+pub(crate) const SESSION_MAGIC_V1: &str = "browser-core-session\t1";
+pub(crate) const SESSION_MAGIC: &str = "browser-core-session\t2";
 
 /// Why session text could not be parsed.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -283,6 +296,7 @@ fn escape_field(value: &str) -> String {
             '\t' => out.push_str("\\t"),
             '\r' => out.push_str("\\r"),
             '\n' => out.push_str("\\n"),
+            '~' => out.push_str("\\~"),
             other => out.push(other),
         }
     }
@@ -302,23 +316,41 @@ fn unescape_field(value: &str) -> Option<String> {
             't' => out.push('\t'),
             'r' => out.push('\r'),
             'n' => out.push('\n'),
+            '~' => out.push('~'),
             _ => return None,
         }
     }
     Some(out)
 }
 
-fn write_title_field(out: &mut String, title: Option<&str>) {
-    match title {
-        None => out.push('-'),
-        Some(title) => {
-            out.push_str("t:");
-            out.push_str(&escape_field(title));
-        }
+/// One entry field in format v2: `<escaped url>` or
+/// `<escaped url>~<escaped title>`.
+fn write_entry_field(out: &mut String, entry: &EntrySnapshot) {
+    out.push_str(&escape_field(&entry.url));
+    if let Some(title) = &entry.title {
+        out.push('~');
+        out.push_str(&escape_field(title));
     }
 }
 
-fn parse_title_field(field: &str) -> Result<Option<String>, SessionParseError> {
+/// Splits a v2 field at the first *unescaped* `~`: escaped separators
+/// (`\~`) belong to the content, not to the structure.
+fn split_unescaped_tilde(field: &str) -> (&str, Option<&str>) {
+    let mut characters = field.char_indices();
+    while let Some((index, character)) = characters.next() {
+        match character {
+            '\\' => {
+                characters.next();
+            }
+            '~' => return (&field[..index], Some(&field[index + 1..])),
+            _ => {}
+        }
+    }
+    (field, None)
+}
+
+/// The v1 tab-level title field: `-` or `t:<escaped title>`.
+fn parse_v1_title_field(field: &str) -> Result<Option<String>, SessionParseError> {
     match field {
         "-" => Ok(None),
         rest => {
@@ -328,9 +360,20 @@ fn parse_title_field(field: &str) -> Result<Option<String>, SessionParseError> {
     }
 }
 
+fn parse_entry_field(field: &str) -> Result<EntrySnapshot, SessionParseError> {
+    let (url, title) = split_unescaped_tilde(field);
+    Ok(EntrySnapshot {
+        url: unescape_field(url).ok_or(SessionParseError)?,
+        title: match title {
+            None => None,
+            Some(title) => Some(unescape_field(title).ok_or(SessionParseError)?),
+        },
+    })
+}
+
 impl TabContainer {
-    /// Serializes the complete container state to deterministic text. The
-    /// core performs no I/O; hosts own reading and writing the bytes.
+    /// Serializes the complete container state to deterministic text (format
+    /// v2). The core performs no I/O; hosts own reading and writing the bytes.
     pub fn to_session_text(&self) -> String {
         let mut out = String::new();
         out.push_str(SESSION_MAGIC);
@@ -350,8 +393,6 @@ impl TabContainer {
             out.push_str("tab\t");
             out.push_str(&slot.id.to_string());
             out.push('\t');
-            write_title_field(&mut out, slot.title.as_deref());
-            out.push('\t');
             match snapshot.cursor {
                 Some(cursor) => out.push_str(&cursor.to_string()),
                 None => out.push('-'),
@@ -360,31 +401,39 @@ impl TabContainer {
             match snapshot.pending {
                 None => out.push('-'),
                 Some(PendingSnapshot::Reload) => out.push_str("reload"),
-                Some(PendingSnapshot::Fresh(url)) => {
+                Some(PendingSnapshot::Fresh { url, title }) => {
                     out.push_str("fresh:");
                     out.push_str(&escape_field(&url));
+                    if let Some(title) = &title {
+                        out.push('~');
+                        out.push_str(&escape_field(title));
+                    }
                 }
             }
             for entry in &snapshot.entries {
                 out.push('\t');
-                out.push_str(&escape_field(entry));
+                write_entry_field(&mut out, entry);
             }
             out.push('\n');
         }
         out
     }
 
-    /// Parses session text produced by `to_session_text`. Validating and
-    /// total: malformed input yields `SessionParseError`, never a panic.
+    /// Parses session text produced by `to_session_text` (format v2) or by
+    /// the M6 v1 writer (entries are bare URLs; all titles are `None`).
+    /// Validating and total: malformed input yields `SessionParseError`,
+    /// never a panic.
     pub fn from_session_text(text: &str) -> Result<Self, SessionParseError> {
         let mut lines: Vec<&str> = text.split('\n').collect();
         if lines.last() == Some(&"") {
             lines.pop();
         }
 
-        if lines.first() != Some(&SESSION_MAGIC) {
-            return Err(SessionParseError);
-        }
+        let version = match lines.first() {
+            Some(&SESSION_MAGIC) => 2,
+            Some(&SESSION_MAGIC_V1) => 1,
+            _ => return Err(SessionParseError),
+        };
 
         let header: Vec<&str> = lines.get(1).ok_or(SessionParseError)?.split('\t').collect();
         if header.len() != 4 || header[0] != "header" {
@@ -400,42 +449,80 @@ impl TabContainer {
         let mut slots = Vec::with_capacity(tab_count);
         for line in lines.iter().skip(2) {
             let fields: Vec<&str> = line.split('\t').collect();
-            if fields.len() < 5 || fields[0] != "tab" {
+            // v1: `tab <id> <title> <cursor> <pending> [entries…]` (≥5);
+            // v2: `tab <id> <cursor> <pending> [entries…]` (≥4).
+            let min_fields = if version == 1 { 5 } else { 4 };
+            if fields.len() < min_fields || fields[0] != "tab" {
                 return Err(SessionParseError);
             }
             let id: u64 = fields[1].parse().map_err(|_| SessionParseError)?;
             if slots.iter().any(|slot: &Slot| slot.id == id) || id >= next_id {
                 return Err(SessionParseError);
             }
-            let title = parse_title_field(fields[2])?;
-            let cursor: Option<usize> = match fields[3] {
+            // v1: `tab <id> <title> <cursor> <pending> <entries…>`;
+            // v2: the title field moved into the entries.
+            let (title, cursor_field, pending_field, entry_fields) = match version {
+                1 => (
+                    parse_v1_title_field(fields[2])?,
+                    fields[3],
+                    fields[4],
+                    &fields[5..],
+                ),
+                _ => (None, fields[2], fields[3], &fields[4..]),
+            };
+            let cursor: Option<usize> = match cursor_field {
                 "-" => None,
                 value => Some(value.parse().map_err(|_| SessionParseError)?),
             };
-            let pending: Option<PendingSnapshot> = match fields[4] {
+            let pending: Option<PendingSnapshot> = match pending_field {
                 "-" => None,
                 "reload" => Some(PendingSnapshot::Reload),
                 value => {
-                    let escaped = value
+                    let rest = value
                         .strip_prefix("fresh:")
                         .ok_or(SessionParseError)?
                         .to_owned();
-                    Some(PendingSnapshot::Fresh(
-                        unescape_field(&escaped).ok_or(SessionParseError)?,
-                    ))
+                    let (url, title) = split_unescaped_tilde(&rest);
+                    Some(PendingSnapshot::Fresh {
+                        url: unescape_field(url).ok_or(SessionParseError)?,
+                        title: match title {
+                            None => None,
+                            Some(title) => Some(unescape_field(title).ok_or(SessionParseError)?),
+                        },
+                    })
                 }
             };
-            let entries: Vec<String> = fields[5..]
+            let entries: Vec<EntrySnapshot> = entry_fields
                 .iter()
-                .map(|field| unescape_field(field).ok_or(SessionParseError))
+                .map(|field| {
+                    if version == 1 {
+                        Ok(EntrySnapshot {
+                            url: unescape_field(field).ok_or(SessionParseError)?,
+                            title: None,
+                        })
+                    } else {
+                        parse_entry_field(field)
+                    }
+                })
                 .collect::<Result<_, _>>()?;
+            // v1 compatibility: the tab-level title maps onto the current
+            // entry (it was "the last reported title"); with no entry it is
+            // dropped, matching the new `nothing_to_title` semantics.
+            let mut entries = entries;
+            if version == 1 {
+                if let (Some(title), Some(cursor)) = (title, cursor) {
+                    if let Some(entry) = entries.get_mut(cursor) {
+                        entry.title = Some(title);
+                    }
+                }
+            }
             let machine = TabMachine::from_snapshot(TabSnapshot {
                 entries,
                 cursor,
                 pending,
             })
             .map_err(|_| SessionParseError)?;
-            slots.push(Slot { id, machine, title });
+            slots.push(Slot { id, machine });
         }
 
         if slots.len() != tab_count {

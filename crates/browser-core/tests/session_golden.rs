@@ -141,7 +141,7 @@ fn session_roundtrip_matrix() {
     }
 
     assert_eq!(scenario_count, 4, "M6 fixture scenario count drift");
-    assert_eq!(checked, 17, "M6 fixture row count drift");
+    assert_eq!(checked, 18, "M6 fixture row count drift");
 }
 
 fn expected_sessions() -> Vec<(&'static str, String)> {
@@ -149,10 +149,10 @@ fn expected_sessions() -> Vec<(&'static str, String)> {
         (
             "roundtrip_full_history_and_titles",
             [
-                "browser-core-session\t1",
+                "browser-core-session\t2",
                 "header\t2\t3\t2",
-                "tab\t1\tt:Example Domain\t1\t-\thttps://a.test/\thttps://b.test/",
-                "tab\t2\t-\t-\t-",
+                "tab\t1\t1\t-\thttps://a.test/\thttps://b.test/~Example Domain",
+                "tab\t2\t-\t-",
             ]
             .join("\n")
                 + "\n",
@@ -160,10 +160,10 @@ fn expected_sessions() -> Vec<(&'static str, String)> {
         (
             "roundtrip_pending_kinds",
             [
-                "browser-core-session\t1",
+                "browser-core-session\t2",
                 "header\t2\t3\t2",
-                "tab\t1\t-\t0\t-\thttps://a.test/",
-                "tab\t2\t-\t0\treload\thttps://b.test/",
+                "tab\t1\t0\t-\thttps://a.test/",
+                "tab\t2\t0\treload\thttps://b.test/",
             ]
             .join("\n")
                 + "\n",
@@ -171,17 +171,17 @@ fn expected_sessions() -> Vec<(&'static str, String)> {
         (
             "roundtrip_strip_order_and_titles",
             [
-                "browser-core-session\t1",
+                "browser-core-session\t2",
                 "header\t2\t3\t2",
-                "tab\t2\tt:Moved\t-\t-",
-                "tab\t1\t-\t-\t-",
+                "tab\t2\t0\t-\thttps://b.test/~Moved",
+                "tab\t1\t-\t-",
             ]
             .join("\n")
                 + "\n",
         ),
         (
             "roundtrip_close_to_empty",
-            ["browser-core-session\t1", "header\t0\t2\t-"].join("\n") + "\n",
+            ["browser-core-session\t2", "header\t0\t2\t-"].join("\n") + "\n",
         ),
     ]
 }
@@ -189,54 +189,54 @@ fn expected_sessions() -> Vec<(&'static str, String)> {
 #[test]
 fn session_text_of_fresh_container_is_pinned() {
     let text = TabContainer::new().to_session_text();
-    assert_eq!(text, "browser-core-session\t1\nheader\t0\t1\t-\n");
+    assert_eq!(text, "browser-core-session\t2\nheader\t0\t1\t-\n");
     let restored = TabContainer::from_session_text(&text).expect("fresh session parses");
     assert_eq!(restored.state(), TabContainer::new().state());
 }
 
 #[test]
+fn v1_sessions_still_parse_with_titles_mapped_to_the_current_entry() {
+    // ADR-014: readers accept v1; the v1 tab-level title maps onto the
+    // current entry, and entryless tabs lose it (nothing_to_title).
+    let v1 = "browser-core-session\t1\nheader\t1\t2\t1\ntab\t1\tt:Example Domain\t0\t-\thttps://a.test/\n";
+    let container = TabContainer::from_session_text(v1).expect("v1 session parses");
+    let view = container.state();
+    let tab = view.tabs.first().expect("tab exists");
+    assert_eq!(tab.state.current_url.as_deref(), Some("https://a.test/"));
+    assert_eq!(tab.title.as_deref(), Some("Example Domain"));
+
+    let v1_entryless = "browser-core-session\t1\nheader\t1\t2\t1\ntab\t1\tt:Lost\t-\t-\n";
+    let container = TabContainer::from_session_text(v1_entryless).expect("v1 session parses");
+    let view = container.state();
+    let tab = view.tabs.first().expect("tab exists");
+    assert_eq!(tab.title, None);
+}
+
+#[test]
 fn escaping_round_trips_hostile_titles_and_urls() {
     let mut container = TabContainer::new();
-    container.handle(ContainerEvent::NewTab(None));
-    container.handle(ContainerEvent::SetTitle(1, Some("-".into())));
+    container.handle(ContainerEvent::NewTab(Some("https://a~b.test".into())));
     container.handle(ContainerEvent::SetTitle(
         1,
         Some("back\\slash and - dash".into()),
     ));
-    container.handle(ContainerEvent::Tab(
-        1,
-        TabEvent::Navigate("ht\ttp://x".into()),
-    ));
     let text = container.to_session_text();
+    // The `~` in the URL and the title are escaped, so the entry field
+    // carries exactly one separator.
+    assert!(text.contains("https://a\\~b.test~back\\\\slash and - dash"));
     let restored = TabContainer::from_session_text(&text).expect("hostile session parses");
     assert_eq!(restored.state(), container.state());
     assert_eq!(restored.to_session_text(), text);
-    let title = restored
-        .state()
-        .tabs
-        .first()
-        .expect("tab exists")
-        .title
-        .clone()
-        .expect("title set");
-    assert_eq!(title, "back\\slash and - dash");
-    let pending = restored
-        .state()
-        .tabs
-        .first()
-        .expect("tab exists")
-        .state
-        .pending_url
-        .clone()
-        .expect("pending set");
-    assert_eq!(pending, "ht\ttp://x");
+    let view = restored.state();
+    let tab = view.tabs.first().expect("tab exists");
+    assert_eq!(tab.title.as_deref(), Some("back\\slash and - dash"));
+    assert_eq!(tab.state.pending_url.as_deref(), Some("https://a~b.test"));
 }
 
 #[test]
 fn set_title_rejects_control_characters() {
     let mut container = TabContainer::new();
     container.handle(ContainerEvent::NewTab(None));
-    container.handle(ContainerEvent::SetTitle(1, Some("good".into())));
     for hostile in ["bad\nline", "col\tumn", "ret\rurn", "del\u{7f}"] {
         let outcome = container.handle(ContainerEvent::SetTitle(1, Some(hostile.into())));
         assert_eq!(
@@ -246,6 +246,19 @@ fn set_title_rejects_control_characters() {
         );
         assert_eq!(outcome.effect, TabEffect::None);
     }
+    // A valid title on an entryless tab is `nothing_to_title` now (ADR-014).
+    let outcome = container.handle(ContainerEvent::SetTitle(1, Some("good".into())));
+    assert_eq!(
+        outcome.noop,
+        Some(ContainerNoOpReason::NothingToTitle),
+        "entryless tabs have nothing to title"
+    );
+    // Once the tab has an entry, the same report lands.
+    container.handle(ContainerEvent::Tab(
+        1,
+        TabEvent::Navigate("https://a.test/".into()),
+    ));
+    container.handle(ContainerEvent::Tab(1, TabEvent::Commit));
     let outcome = container.handle(ContainerEvent::SetTitle(1, Some("good".into())));
     assert_eq!(outcome.noop, None);
     assert_eq!(
@@ -266,7 +279,7 @@ fn parser_rejects_malformed_sessions() {
     assert!(TabContainer::from_session_text(ok).is_ok());
 
     let cases: [(&str, &str); 8] = [
-        ("bad magic", "browser-core-session\t2\nheader\t0\t1\t-\n"),
+        ("bad magic", "browser-core-session\t3\nheader\t0\t1\t-\n"),
         ("missing header", "browser-core-session\t1\n"),
         (
             "unknown active id",
