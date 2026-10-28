@@ -192,78 +192,105 @@ impl WorkspaceBinding {
         self.handle(WorkspaceEvent::NewWindow)
     }
 
-    pub fn close_window(&mut self, window: u64) -> JsValue {
-        self.handle(WorkspaceEvent::CloseWindow(window))
+    pub fn close_window(&mut self, window: u32) -> JsValue {
+        self.handle(WorkspaceEvent::CloseWindow(u64::from(window)))
     }
 
-    pub fn activate_window(&mut self, window: u64) -> JsValue {
-        self.handle(WorkspaceEvent::ActivateWindow(window))
+    pub fn activate_window(&mut self, window: u32) -> JsValue {
+        self.handle(WorkspaceEvent::ActivateWindow(u64::from(window)))
     }
 
-    pub fn container_new_tab(&mut self, window: u64, initial: Option<String>) -> JsValue {
-        self.route(window, ContainerEvent::NewTab(initial))
+    pub fn container_new_tab(&mut self, window: u32, initial: Option<String>) -> JsValue {
+        self.route(u64::from(window), ContainerEvent::NewTab(initial))
     }
 
-    pub fn container_close_tab(&mut self, window: u64, tab: u64) -> JsValue {
-        self.route(window, ContainerEvent::CloseTab(tab))
+    pub fn container_close_tab(&mut self, window: u32, tab: u32) -> JsValue {
+        self.route(u64::from(window), ContainerEvent::CloseTab(u64::from(tab)))
     }
 
-    pub fn container_activate_tab(&mut self, window: u64, tab: u64) -> JsValue {
-        self.route(window, ContainerEvent::Activate(tab))
+    pub fn container_activate_tab(&mut self, window: u32, tab: u32) -> JsValue {
+        self.route(u64::from(window), ContainerEvent::Activate(u64::from(tab)))
     }
 
-    pub fn container_navigate(&mut self, window: u64, tab: u64, url: &str) -> JsValue {
+    pub fn container_navigate(&mut self, window: u32, tab: u32, url: &str) -> JsValue {
         self.route(
-            window,
-            ContainerEvent::Tab(tab, TabEvent::Navigate(url.to_owned())),
+            u64::from(window),
+            ContainerEvent::Tab(u64::from(tab), TabEvent::Navigate(url.to_owned())),
         )
     }
 
-    pub fn container_commit(&mut self, window: u64, tab: u64) -> JsValue {
-        self.route(window, ContainerEvent::Tab(tab, TabEvent::Commit))
+    pub fn container_commit(&mut self, window: u32, tab: u32) -> JsValue {
+        self.route(
+            u64::from(window),
+            ContainerEvent::Tab(u64::from(tab), TabEvent::Commit),
+        )
     }
 
-    pub fn container_fail(&mut self, window: u64, tab: u64) -> JsValue {
-        self.route(window, ContainerEvent::Tab(tab, TabEvent::Fail))
+    pub fn container_fail(&mut self, window: u32, tab: u32) -> JsValue {
+        self.route(
+            u64::from(window),
+            ContainerEvent::Tab(u64::from(tab), TabEvent::Fail),
+        )
     }
 
-    pub fn container_stop(&mut self, window: u64, tab: u64) -> JsValue {
-        self.route(window, ContainerEvent::Tab(tab, TabEvent::Stop))
+    pub fn container_stop(&mut self, window: u32, tab: u32) -> JsValue {
+        self.route(
+            u64::from(window),
+            ContainerEvent::Tab(u64::from(tab), TabEvent::Stop),
+        )
     }
 
-    pub fn container_back(&mut self, window: u64, tab: u64) -> JsValue {
-        self.route(window, ContainerEvent::Tab(tab, TabEvent::Back))
+    pub fn container_back(&mut self, window: u32, tab: u32) -> JsValue {
+        self.route(
+            u64::from(window),
+            ContainerEvent::Tab(u64::from(tab), TabEvent::Back),
+        )
     }
 
-    pub fn container_forward(&mut self, window: u64, tab: u64) -> JsValue {
-        self.route(window, ContainerEvent::Tab(tab, TabEvent::Forward))
+    pub fn container_forward(&mut self, window: u32, tab: u32) -> JsValue {
+        self.route(
+            u64::from(window),
+            ContainerEvent::Tab(u64::from(tab), TabEvent::Forward),
+        )
     }
 
-    pub fn container_reload(&mut self, window: u64, tab: u64) -> JsValue {
-        self.route(window, ContainerEvent::Tab(tab, TabEvent::Reload))
+    pub fn container_reload(&mut self, window: u32, tab: u32) -> JsValue {
+        self.route(
+            u64::from(window),
+            ContainerEvent::Tab(u64::from(tab), TabEvent::Reload),
+        )
     }
 
-    pub fn container_move_tab(&mut self, window: u64, tab: u64, to_index: usize) -> JsValue {
-        self.route(window, ContainerEvent::MoveTab(tab, to_index))
+    pub fn container_move_tab(&mut self, window: u32, tab: u32, to_index: usize) -> JsValue {
+        self.route(
+            u64::from(window),
+            ContainerEvent::MoveTab(u64::from(tab), to_index),
+        )
     }
 
-    pub fn container_set_title(&mut self, window: u64, tab: u64, title: Option<String>) -> JsValue {
-        self.route(window, ContainerEvent::SetTitle(tab, title))
+    pub fn container_set_title(&mut self, window: u32, tab: u32, title: Option<String>) -> JsValue {
+        self.route(
+            u64::from(window),
+            ContainerEvent::SetTitle(u64::from(tab), title),
+        )
     }
 
     pub fn container_set_favicon(
         &mut self,
-        window: u64,
-        tab: u64,
+        window: u32,
+        tab: u32,
         favicon: Option<String>,
     ) -> JsValue {
-        self.route(window, ContainerEvent::SetFavicon(tab, favicon))
+        self.route(
+            u64::from(window),
+            ContainerEvent::SetFavicon(u64::from(tab), favicon),
+        )
     }
 
     /// The M6 session text of the addressed window's container. Errors with
     /// `"unknown_window"` when the window does not exist.
-    pub fn container_session_text(&self, window: u64) -> Result<String, JsValue> {
-        match self.workspace.container_session_text(window) {
+    pub fn container_session_text(&self, window: u32) -> Result<String, JsValue> {
+        match self.workspace.container_session_text(u64::from(window)) {
             Some(text) => Ok(text),
             None => Err("unknown_window".into()),
         }
@@ -274,10 +301,13 @@ impl WorkspaceBinding {
     /// for structurally invalid input.
     pub fn container_set_session_text(
         &mut self,
-        window: u64,
+        window: u32,
         text: &str,
     ) -> Result<JsValue, JsValue> {
-        match self.workspace.set_container_session_text(window, text) {
+        match self
+            .workspace
+            .set_container_session_text(u64::from(window), text)
+        {
             Ok(()) => Ok(self.snapshot()),
             Err(error) => Err(error.as_str().into()),
         }

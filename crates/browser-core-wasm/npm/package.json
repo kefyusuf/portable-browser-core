@@ -1,0 +1,18 @@
+{
+  "name": "portable-browser-core",
+  "version": "0.1.0",
+  "description": "Platform-independent browser decision core: deterministic navigation resolution, tab lifecycle, session history, and window sets (WASM bridge)",
+  "main": "browser_core_wasm.js",
+  "types": "browser_core_wasm.d.ts",
+  "files": [
+    "browser_core_wasm_bg.wasm",
+    "browser_core_wasm.js",
+    "browser_core_wasm.d.ts"
+  ],
+  "license": "UNLICENSED",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kefyusuf/portable-browser-core"
+  }
+}
