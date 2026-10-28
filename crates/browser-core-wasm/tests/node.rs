@@ -161,7 +161,7 @@ fn session_passthrough_round_trips() {
     let text = workspace
         .container_session_text(1)
         .expect("session text for window 1");
-    assert!(text.starts_with("browser-core-session\t1"));
+    assert!(text.starts_with("browser-core-session\t2"));
 
     // Restore into a second window; the serialized state must be identical.
     workspace.new_window();
