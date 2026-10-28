@@ -1,6 +1,6 @@
 # ADR-015 — M12 per-entry favicons
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead, "sıradaki iş maddesi ile devam edelim" on the candidate list); implemented on `feat/m12-entry-favicons`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #12, accepted head `62f0cbf`, CI run 40773534771). See the M12 milestone for the evidence index.
 
 ## Context
 

@@ -1,6 +1,6 @@
 # M12 — Per-entry favicons
 
-**State: IMPLEMENTING** — ADR-015 accepted 2026-10-27; implementation on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-27.
 
 ## Deliverable
 
@@ -14,8 +14,8 @@ Favicons mirror the ADR-014 title model exactly: each history entry remembers it
 - [x] Session v2 entry fields extend to `<url>[~<title>[~<favicon>]]` (absent segments omitted; escape-aware `~` split reused); pending `fresh:` fields likewise. Writers emit the extended v2; readers accept 1–3 segment fields and v1 unchanged.
 - [x] The M8 snapshot's tab object gains `favicon` additively; existing fields unchanged.
 - [x] Golden fixtures regenerate: M2 (79 rows / 13 scenarios, favicon component + `favicon_retargets_by_phase`), M3 (favicon component), M6/M9 byte expectations unchanged (no favicons in those scenarios) with new v2 favicon-segment tests.
-- [ ] Multi-platform CI green bound to the final exact PR head (3-OS Rust + Ubuntu cdylib build + Node binding tests).
-- [ ] Independent acceptance of ADR-015 semantics for the final exact HEAD.
+- [x] Multi-platform CI green bound to the final exact PR head (3-OS Rust + Ubuntu cdylib build + Node binding tests). *(Core CI run [40773534771](https://github.com/kefyusuf/portable-browser-core/actions/runs/40773534771) PASS on head `62f0cbf`.)*
+- [x] Independent acceptance of ADR-015 semantics for the final exact HEAD. *(Maintainer accepted 2026-10-27 by approving the merge of PR #12. Semantics acceptance recorded 2026-10-27 in the design round; the local Windows verification record — including a local Node run — is in the PR evidence comment.)*
 
 ## Baseline/provenance
 
