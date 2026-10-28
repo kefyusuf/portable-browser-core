@@ -46,5 +46,6 @@ The a–e roadmap is complete. No further milestone is predefined; the next scop
 - **M9:** Workspace session format — **DONE** (accepted and merged 2026-10-27; PR #9, head `f97e108`).
 - **M10:** Workspace session over the JS bridge — **DONE** (accepted and merged 2026-10-27; PR #10, head `1a4a83b`).
 - **M11:** Per-history-entry titles — **DONE** (accepted and merged 2026-10-27; PR #11, head `b32dcdb`).
+- **M12:** Per-entry favicons — **IN REVIEW**: implementation on [PR #12](https://github.com/kefyusuf/portable-browser-core/pull/12) ([milestone](docs/milestones/M12-entry-favicons.md), [ADR-015](docs/decisions/ADR-015-entry-favicons.md)).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.

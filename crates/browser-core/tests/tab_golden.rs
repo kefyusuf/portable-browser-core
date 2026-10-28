@@ -10,7 +10,7 @@ fn expected_option(cell: &str) -> Option<&str> {
 
 fn assert_state(outcome: &TabOutcome, cell: &str, row: usize) {
     let parts: Vec<&str> = cell.split('|').collect();
-    assert_eq!(parts.len(), 6, "state cell arity at row {row}");
+    assert_eq!(parts.len(), 7, "state cell arity at row {row}");
     let expected_phase = match parts[0] {
         "empty" => TabPhase::Empty,
         "loading" => TabPhase::Loading,
@@ -43,6 +43,11 @@ fn assert_state(outcome: &TabOutcome, cell: &str, row: usize) {
         expected_option(parts[5]),
         "title at row {row}"
     );
+    assert_eq!(
+        outcome.state.favicon.as_deref(),
+        expected_option(parts[6]),
+        "favicon at row {row}"
+    );
 }
 
 fn assert_effect(outcome: &TabOutcome, cell: &str, row: usize) {
@@ -68,6 +73,7 @@ fn assert_noop(outcome: &TabOutcome, cell: &str, row: usize) {
                 NoOpReason::AtBoundary,
                 NoOpReason::NothingToReload,
                 NoOpReason::NothingToTitle,
+                NoOpReason::NothingToFavicon,
             ]
             .into_iter()
             .find(|known| known.as_str() == reason)
@@ -125,6 +131,7 @@ fn tab_golden_matrix() {
             "forward" => TabEvent::Forward,
             "reload" => TabEvent::Reload,
             "set_title" => TabEvent::SetTitle(expected_option(arg).map(str::to_owned)),
+            "set_favicon" => TabEvent::SetFavicon(expected_option(arg).map(str::to_owned)),
             other => panic!("unknown event {other:?} at row {}", index + 1),
         };
 
@@ -135,8 +142,8 @@ fn tab_golden_matrix() {
         checked += 1;
     }
 
-    assert_eq!(scenario_count, 12, "M2 fixture scenario count drift");
-    assert_eq!(checked, 70, "M2 fixture row count drift");
+    assert_eq!(scenario_count, 13, "M2 fixture scenario count drift");
+    assert_eq!(checked, 79, "M2 fixture row count drift");
 }
 
 #[test]

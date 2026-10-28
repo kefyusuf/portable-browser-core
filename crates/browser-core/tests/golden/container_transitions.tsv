@@ -2,63 +2,63 @@
 # ADR-006/007/008: one scenario replays on a fresh container; rows assert the full public view per step.
 # event: new_tab (arg = initial target or -) | close:<id> | activate:<id> | tab:<id>:<inner event> (arg = target for tab:<id>:navigate) | move:<id>:<to_index> | set_title:<id> (arg = title or - to clear)
 # view: active=<id or ->|tabs=<id|phase|pending|current|can_back|can_forward|title>,...   (tabs=- when empty; - for absent urls/titles)
-new_tab_lifecycle	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-	none	-
-new_tab_lifecycle	2	tab:1:navigate	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-	start_load|https://a.test/	-
-new_tab_lifecycle	3	tab:1:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|-	none	-
-close_active_activates_right	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-	none	-
-close_active_activates_right	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	-
-close_active_activates_right	3	new_tab	-	active=3|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-close_active_activates_right	4	activate:1	-	active=1|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-close_active_activates_right	5	close:1	-	active=2|tabs=2|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-close_active_activates_right	6	close:2	-	active=3|tabs=3|empty|-|-|0|0|-	none	-
+new_tab_lifecycle	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-|-	none	-
+new_tab_lifecycle	2	tab:1:navigate	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-|-	start_load|https://a.test/	-
+new_tab_lifecycle	3	tab:1:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|-|-	none	-
+close_active_activates_right	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-|-	none	-
+close_active_activates_right	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-	none	-
+close_active_activates_right	3	new_tab	-	active=3|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+close_active_activates_right	4	activate:1	-	active=1|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+close_active_activates_right	5	close:1	-	active=2|tabs=2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+close_active_activates_right	6	close:2	-	active=3|tabs=3|empty|-|-|0|0|-|-	none	-
 close_active_activates_right	7	close:3	-	active=-|tabs=-	none	-
-close_last_activates_left	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-	none	-
-close_last_activates_left	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	-
-close_last_activates_left	3	new_tab	-	active=3|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-close_last_activates_left	4	close:3	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	-
-background_close_keeps_active	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-	none	-
-background_close_keeps_active	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	-
-background_close_keeps_active	3	close:1	-	active=2|tabs=2|empty|-|-|0|0|-	none	-
+close_last_activates_left	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-|-	none	-
+close_last_activates_left	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-	none	-
+close_last_activates_left	3	new_tab	-	active=3|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+close_last_activates_left	4	close:3	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-	none	-
+background_close_keeps_active	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-|-	none	-
+background_close_keeps_active	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-	none	-
+background_close_keeps_active	3	close:1	-	active=2|tabs=2|empty|-|-|0|0|-|-	none	-
 unknown_ids	1	close:9	-	active=-|tabs=-	none	unknown_tab
 unknown_ids	2	activate:9	-	active=-|tabs=-	none	unknown_tab
 unknown_ids	3	tab:9:back	-	active=-|tabs=-	none	unknown_tab
-background_commit_and_switch	1	new_tab	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-	start_load|https://a.test/	-
-background_commit_and_switch	2	tab:1:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|-	none	-
-background_commit_and_switch	3	new_tab	https://b.test/	active=2|tabs=1|active|-|https://a.test/|0|0|-,2|loading|https://b.test/|-|0|0|-	start_load|https://b.test/	-
-background_commit_and_switch	4	tab:2:commit	-	active=2|tabs=1|active|-|https://a.test/|0|0|-,2|active|-|https://b.test/|0|0|-	none	-
-background_commit_and_switch	5	activate:1	-	active=1|tabs=1|active|-|https://a.test/|0|0|-,2|active|-|https://b.test/|0|0|-	none	-
-background_commit_and_switch	6	tab:2:navigate	https://c.test/	active=1|tabs=1|active|-|https://a.test/|0|0|-,2|loading|https://c.test/|https://b.test/|0|0|-	start_load|https://c.test/	-
-background_commit_and_switch	7	tab:2:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|-,2|active|-|https://c.test/|1|0|-	none	-
-background_commit_and_switch	8	activate:1	-	active=1|tabs=1|active|-|https://a.test/|0|0|-,2|active|-|https://c.test/|1|0|-	none	-
-move_tab_preserves_identity	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-	none	-
-move_tab_preserves_identity	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	-
-move_tab_preserves_identity	3	new_tab	-	active=3|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-move_tab_preserves_identity	4	activate:1	-	active=1|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-move_tab_preserves_identity	5	move:1:2	-	active=1|tabs=2|empty|-|-|0|0|-,3|empty|-|-|0|0|-,1|empty|-|-|0|0|-	none	-
-move_tab_preserves_identity	6	move:2:0	-	active=1|tabs=2|empty|-|-|0|0|-,3|empty|-|-|0|0|-,1|empty|-|-|0|0|-	none	-
-close_after_reorder_uses_current_positions	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-	none	-
-close_after_reorder_uses_current_positions	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	-
-close_after_reorder_uses_current_positions	3	new_tab	-	active=3|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-close_after_reorder_uses_current_positions	4	activate:2	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-close_after_reorder_uses_current_positions	5	move:2:0	-	active=2|tabs=2|empty|-|-|0|0|-,1|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-close_after_reorder_uses_current_positions	6	close:2	-	active=1|tabs=1|empty|-|-|0|0|-,3|empty|-|-|0|0|-	none	-
-move_invalid_events	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-	none	-
-move_invalid_events	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	-
-move_invalid_events	3	move:9:0	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	unknown_tab
-move_invalid_events	4	move:1:2	-	active=2|tabs=1|empty|-|-|0|0|-,2|empty|-|-|0|0|-	none	index_out_of_range
-title_set_clear_and_persistence	1	new_tab	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-	start_load|https://a.test/	-
-title_set_clear_and_persistence	2	set_title:1	Example Domain	active=1|tabs=1|loading|https://a.test/|-|0|0|Example Domain	none	-
-title_set_clear_and_persistence	3	tab:1:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|Example Domain	none	-
-title_set_clear_and_persistence	4	set_title:1	-	active=1|tabs=1|active|-|https://a.test/|0|0|-	none	-
-titles_are_per_tab	1	new_tab	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-	start_load|https://a.test/	-
-titles_are_per_tab	2	set_title:1	Page A	active=1|tabs=1|loading|https://a.test/|-|0|0|Page A	none	-
-titles_are_per_tab	3	new_tab	https://b.test/	active=2|tabs=1|loading|https://a.test/|-|0|0|Page A,2|loading|https://b.test/|-|0|0|-	start_load|https://b.test/	-
-titles_are_per_tab	4	set_title:2	Page B	active=2|tabs=1|loading|https://a.test/|-|0|0|Page A,2|loading|https://b.test/|-|0|0|Page B	none	-
-titles_are_per_tab	5	activate:1	-	active=1|tabs=1|loading|https://a.test/|-|0|0|Page A,2|loading|https://b.test/|-|0|0|Page B	none	-
-title_travels_with_identity	1	new_tab	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-	start_load|https://a.test/	-
-title_travels_with_identity	2	tab:1:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|-	none	-
-title_travels_with_identity	3	set_title:1	Second	active=1|tabs=1|active|-|https://a.test/|0|0|Second	none	-
-title_travels_with_identity	4	new_tab	-	active=2|tabs=1|active|-|https://a.test/|0|0|Second,2|empty|-|-|0|0|-	none	-
-title_travels_with_identity	5	move:1:1	-	active=2|tabs=2|empty|-|-|0|0|-,1|active|-|https://a.test/|0|0|Second	none	-
-title_travels_with_identity	6	close:2	-	active=1|tabs=1|active|-|https://a.test/|0|0|Second	none	-
+background_commit_and_switch	1	new_tab	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-|-	start_load|https://a.test/	-
+background_commit_and_switch	2	tab:1:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|-|-	none	-
+background_commit_and_switch	3	new_tab	https://b.test/	active=2|tabs=1|active|-|https://a.test/|0|0|-|-,2|loading|https://b.test/|-|0|0|-|-	start_load|https://b.test/	-
+background_commit_and_switch	4	tab:2:commit	-	active=2|tabs=1|active|-|https://a.test/|0|0|-|-,2|active|-|https://b.test/|0|0|-|-	none	-
+background_commit_and_switch	5	activate:1	-	active=1|tabs=1|active|-|https://a.test/|0|0|-|-,2|active|-|https://b.test/|0|0|-|-	none	-
+background_commit_and_switch	6	tab:2:navigate	https://c.test/	active=1|tabs=1|active|-|https://a.test/|0|0|-|-,2|loading|https://c.test/|https://b.test/|0|0|-|-	start_load|https://c.test/	-
+background_commit_and_switch	7	tab:2:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|-|-,2|active|-|https://c.test/|1|0|-|-	none	-
+background_commit_and_switch	8	activate:1	-	active=1|tabs=1|active|-|https://a.test/|0|0|-|-,2|active|-|https://c.test/|1|0|-|-	none	-
+move_tab_preserves_identity	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-|-	none	-
+move_tab_preserves_identity	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-	none	-
+move_tab_preserves_identity	3	new_tab	-	active=3|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+move_tab_preserves_identity	4	activate:1	-	active=1|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+move_tab_preserves_identity	5	move:1:2	-	active=1|tabs=2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-,1|empty|-|-|0|0|-|-	none	-
+move_tab_preserves_identity	6	move:2:0	-	active=1|tabs=2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-,1|empty|-|-|0|0|-|-	none	-
+close_after_reorder_uses_current_positions	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-|-	none	-
+close_after_reorder_uses_current_positions	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-	none	-
+close_after_reorder_uses_current_positions	3	new_tab	-	active=3|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+close_after_reorder_uses_current_positions	4	activate:2	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+close_after_reorder_uses_current_positions	5	move:2:0	-	active=2|tabs=2|empty|-|-|0|0|-|-,1|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+close_after_reorder_uses_current_positions	6	close:2	-	active=1|tabs=1|empty|-|-|0|0|-|-,3|empty|-|-|0|0|-|-	none	-
+move_invalid_events	1	new_tab	-	active=1|tabs=1|empty|-|-|0|0|-|-	none	-
+move_invalid_events	2	new_tab	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-	none	-
+move_invalid_events	3	move:9:0	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-	none	unknown_tab
+move_invalid_events	4	move:1:2	-	active=2|tabs=1|empty|-|-|0|0|-|-,2|empty|-|-|0|0|-|-	none	index_out_of_range
+title_set_clear_and_persistence	1	new_tab	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-|-	start_load|https://a.test/	-
+title_set_clear_and_persistence	2	set_title:1	Example Domain	active=1|tabs=1|loading|https://a.test/|-|0|0|Example Domain|-	none	-
+title_set_clear_and_persistence	3	tab:1:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|Example Domain|-	none	-
+title_set_clear_and_persistence	4	set_title:1	-	active=1|tabs=1|active|-|https://a.test/|0|0|-|-	none	-
+titles_are_per_tab	1	new_tab	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-|-	start_load|https://a.test/	-
+titles_are_per_tab	2	set_title:1	Page A	active=1|tabs=1|loading|https://a.test/|-|0|0|Page A|-	none	-
+titles_are_per_tab	3	new_tab	https://b.test/	active=2|tabs=1|loading|https://a.test/|-|0|0|Page A|-,2|loading|https://b.test/|-|0|0|-|-	start_load|https://b.test/	-
+titles_are_per_tab	4	set_title:2	Page B	active=2|tabs=1|loading|https://a.test/|-|0|0|Page A|-,2|loading|https://b.test/|-|0|0|Page B|-	none	-
+titles_are_per_tab	5	activate:1	-	active=1|tabs=1|loading|https://a.test/|-|0|0|Page A|-,2|loading|https://b.test/|-|0|0|Page B|-	none	-
+title_travels_with_identity	1	new_tab	https://a.test/	active=1|tabs=1|loading|https://a.test/|-|0|0|-|-	start_load|https://a.test/	-
+title_travels_with_identity	2	tab:1:commit	-	active=1|tabs=1|active|-|https://a.test/|0|0|-|-	none	-
+title_travels_with_identity	3	set_title:1	Second	active=1|tabs=1|active|-|https://a.test/|0|0|Second|-	none	-
+title_travels_with_identity	4	new_tab	-	active=2|tabs=1|active|-|https://a.test/|0|0|Second|-,2|empty|-|-|0|0|-|-	none	-
+title_travels_with_identity	5	move:1:1	-	active=2|tabs=2|empty|-|-|0|0|-|-,1|active|-|https://a.test/|0|0|Second|-	none	-
+title_travels_with_identity	6	close:2	-	active=1|tabs=1|active|-|https://a.test/|0|0|Second|-	none	-
 set_title_unknown_tab	1	set_title:9	Ghost	active=-|tabs=-	none	unknown_tab

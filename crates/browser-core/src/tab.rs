@@ -10,8 +10,10 @@
 pub enum PendingSnapshot {
     Fresh {
         url: String,
-        /// A title reported while loading travels into the entry at commit.
+        /// A title/favicon reported while loading travels into the entry at
+        /// commit.
         title: Option<String>,
+        favicon: Option<String>,
     },
     Reload,
 }
@@ -31,6 +33,7 @@ pub struct TabSnapshot {
 pub struct EntrySnapshot {
     pub url: String,
     pub title: Option<String>,
+    pub favicon: Option<String>,
 }
 
 /// Why a snapshot could not be restored.
@@ -44,11 +47,12 @@ impl SnapshotError {
 }
 
 /// One history entry: the normalized target URL and the host-reported title
-/// remembered for that page.
+/// and favicon reference remembered for that page.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Entry {
     pub url: String,
     pub title: Option<String>,
+    pub favicon: Option<String>,
 }
 
 /// An event the host submits to the tab machine.
@@ -73,6 +77,9 @@ pub enum TabEvent {
     /// in `Active`, the pending target in `Loading`. Nothing to title in
     /// `Empty`.
     SetTitle(Option<String>),
+    /// Report the favicon reference of the page the event addresses, with
+    /// the same phase retargeting as `SetTitle`.
+    SetFavicon(Option<String>),
 }
 
 /// Why an event produced no transition. The machine is total: invalid
@@ -87,6 +94,8 @@ pub enum NoOpReason {
     NothingToReload,
     /// There is no history entry to attach a title to.
     NothingToTitle,
+    /// There is no history entry to attach a favicon to.
+    NothingToFavicon,
 }
 
 impl NoOpReason {
@@ -96,6 +105,7 @@ impl NoOpReason {
             Self::AtBoundary => "at_boundary",
             Self::NothingToReload => "nothing_to_reload",
             Self::NothingToTitle => "nothing_to_title",
+            Self::NothingToFavicon => "nothing_to_favicon",
         }
     }
 }
@@ -131,6 +141,9 @@ pub struct TabStateView {
     /// The displayed title: during a load the pending title if already
     /// reported, else the current entry's title (the page being left).
     pub title: Option<String>,
+    /// The displayed favicon reference: the same pending-current rule as
+    /// the title.
+    pub favicon: Option<String>,
     pub can_back: bool,
     pub can_forward: bool,
 }
@@ -146,7 +159,11 @@ pub struct TabOutcome {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum PendingTarget {
-    Fresh { url: String, title: Option<String> },
+    Fresh {
+        url: String,
+        title: Option<String>,
+        favicon: Option<String>,
+    },
     Reload,
 }
 
@@ -177,13 +194,19 @@ impl TabMachine {
                 .map(|entry| EntrySnapshot {
                     url: entry.url.clone(),
                     title: entry.title.clone(),
+                    favicon: entry.favicon.clone(),
                 })
                 .collect(),
             cursor: self.cursor,
             pending: self.pending.as_ref().map(|pending| match pending {
-                PendingTarget::Fresh { url, title } => PendingSnapshot::Fresh {
+                PendingTarget::Fresh {
+                    url,
+                    title,
+                    favicon,
+                } => PendingSnapshot::Fresh {
                     url: url.clone(),
                     title: title.clone(),
+                    favicon: favicon.clone(),
                 },
                 PendingTarget::Reload => PendingSnapshot::Reload,
             }),
@@ -207,11 +230,20 @@ impl TabMachine {
                 .map(|entry| Entry {
                     url: entry.url,
                     title: entry.title,
+                    favicon: entry.favicon,
                 })
                 .collect(),
             cursor: snapshot.cursor,
             pending: snapshot.pending.map(|pending| match pending {
-                PendingSnapshot::Fresh { url, title } => PendingTarget::Fresh { url, title },
+                PendingSnapshot::Fresh {
+                    url,
+                    title,
+                    favicon,
+                } => PendingTarget::Fresh {
+                    url,
+                    title,
+                    favicon,
+                },
                 PendingSnapshot::Reload => PendingTarget::Reload,
             }),
         })
@@ -233,17 +265,27 @@ impl TabMachine {
             Some(PendingTarget::Reload) => current_url.clone(),
             None => None,
         };
-        // Displayed title: a title reported for the loading page wins, else
-        // the page being left (or the current entry) shows its own.
-        let title = match &self.pending {
-            Some(PendingTarget::Fresh {
-                title: Some(title), ..
-            }) => Some(title.clone()),
-            Some(PendingTarget::Fresh { title: None, .. }) | Some(PendingTarget::Reload) => {
-                current_entry.and_then(|entry| entry.title.clone())
-            }
-            None => current_entry.and_then(|entry| entry.title.clone()),
-        };
+        // Displayed title and favicon: a value reported for the loading page
+        // wins, else the page being left (or the current entry) shows its
+        // own.
+        let title = displayed(
+            &self.pending,
+            current_entry,
+            |pending| match pending {
+                PendingTarget::Fresh { title, .. } => title.clone(),
+                PendingTarget::Reload => None,
+            },
+            |entry| entry.title.clone(),
+        );
+        let favicon = displayed(
+            &self.pending,
+            current_entry,
+            |pending| match pending {
+                PendingTarget::Fresh { favicon, .. } => favicon.clone(),
+                PendingTarget::Reload => None,
+            },
+            |entry| entry.favicon.clone(),
+        );
         TabStateView {
             phase,
             can_back: matches!(self.cursor, Some(cursor) if cursor > 0),
@@ -251,6 +293,7 @@ impl TabMachine {
             current_url,
             pending_url,
             title,
+            favicon,
         }
     }
 
@@ -260,6 +303,7 @@ impl TabMachine {
                 self.pending = Some(PendingTarget::Fresh {
                     url: url.clone(),
                     title: None,
+                    favicon: None,
                 });
                 self.finish(TabEffect::StartLoad(url), None)
             }
@@ -267,11 +311,19 @@ impl TabMachine {
                 None => self.finish(TabEffect::None, Some(NoOpReason::UnexpectedEvent)),
                 // Truncation of the forward stack happens here, at commit,
                 // so a failed navigation cannot destroy reachable history.
-                Some(PendingTarget::Fresh { url, title }) => {
+                Some(PendingTarget::Fresh {
+                    url,
+                    title,
+                    favicon,
+                }) => {
                     if let Some(cursor) = self.cursor {
                         self.entries.truncate(cursor + 1);
                     }
-                    self.entries.push(Entry { url, title });
+                    self.entries.push(Entry {
+                        url,
+                        title,
+                        favicon,
+                    });
                     self.cursor = Some(self.entries.len() - 1);
                     self.finish(TabEffect::None, None)
                 }
@@ -323,6 +375,28 @@ impl TabMachine {
                     None => self.finish(TabEffect::None, Some(NoOpReason::NothingToTitle)),
                 }
             }
+            TabEvent::SetFavicon(favicon) => {
+                // The ADR-014 rule applied to favicons: identical retargeting.
+                match &mut self.pending {
+                    Some(PendingTarget::Fresh { favicon: field, .. }) => {
+                        *field = favicon;
+                        return self.finish(TabEffect::None, None);
+                    }
+                    Some(PendingTarget::Reload) => {
+                        let cursor = self.cursor.expect("reload pending implies a cursor");
+                        self.entries[cursor].favicon = favicon;
+                        return self.finish(TabEffect::None, None);
+                    }
+                    None => {}
+                }
+                match self.cursor {
+                    Some(cursor) => {
+                        self.entries[cursor].favicon = favicon;
+                        self.finish(TabEffect::None, None)
+                    }
+                    None => self.finish(TabEffect::None, Some(NoOpReason::NothingToFavicon)),
+                }
+            }
         }
     }
 
@@ -352,5 +426,23 @@ impl TabMachine {
             effect,
             noop,
         }
+    }
+}
+
+/// The displayed value of a per-entry field: a value reported for the
+/// loading page wins, else the page being left (or the current entry) shows
+/// its own.
+fn displayed(
+    pending: &Option<PendingTarget>,
+    current_entry: Option<&Entry>,
+    pending_field: impl Fn(&PendingTarget) -> Option<String>,
+    entry_field: impl Fn(&Entry) -> Option<String>,
+) -> Option<String> {
+    match pending {
+        Some(pending) => match pending_field(pending) {
+            Some(value) => Some(value),
+            None => current_entry.and_then(entry_field),
+        },
+        None => current_entry.and_then(entry_field),
     }
 }

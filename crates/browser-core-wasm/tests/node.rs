@@ -187,6 +187,33 @@ fn session_passthrough_round_trips() {
 }
 
 #[wasm_bindgen_test]
+fn favicon_flows_through_the_bridge() {
+    let mut workspace = WorkspaceBinding::new();
+    workspace.new_window();
+    workspace.container_new_tab(1, Some("https://a.test/".into()));
+    workspace.container_commit(1, 1);
+    let snapshot = workspace.container_set_favicon(1, 1, Some("https://a.test/icon.ico".into()));
+    assert!(get(&snapshot, "noop").is_null());
+    let tab = tab_at(&snapshot, 0, 0);
+    assert_eq!(
+        str_of(&tab, "favicon"),
+        Some("https://a.test/icon.ico".into())
+    );
+
+    // Session passthrough carries the favicon segment (v2): untitled entry
+    // first, then the three-segment form once the title is reported.
+    let text = workspace
+        .container_session_text(1)
+        .expect("session text for window 1");
+    assert!(text.contains("https://a.test/~~https://a.test/icon.ico"));
+    workspace.container_set_title(1, 1, Some("Example Domain".into()));
+    let text = workspace
+        .container_session_text(1)
+        .expect("session text for window 1");
+    assert!(text.contains("https://a.test/~Example Domain~https://a.test/icon.ico"));
+}
+
+#[wasm_bindgen_test]
 fn workspace_session_passthrough_round_trips() {
     let mut workspace = WorkspaceBinding::new();
     workspace.new_window();
