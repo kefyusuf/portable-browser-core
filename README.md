@@ -44,6 +44,6 @@ The Cargo.lock file is checked in. CI uses --locked to reject unrecorded depende
 
 The a–e roadmap is complete. No further milestone is predefined; the next scope starts from the ADRs' explicitly out-of-scope lists (workspace session format, npm packaging, WebView adapter, per-entry titles, favicons).
 - **M9:** Workspace session format — **DONE** (accepted and merged 2026-10-27; PR #9, head `f97e108`).
-- **M10:** Workspace session over the JS bridge — **IN REVIEW**: implementation on [PR #10](https://github.com/kefyusuf/portable-browser-core/pull/10) ([milestone](docs/milestones/M10-workspace-binding-session.md), [ADR-013](docs/decisions/ADR-013-workspace-binding-session.md)).
+- **M10:** Workspace session over the JS bridge — **DONE** (accepted and merged 2026-10-27; PR #10, head `1a4a83b`).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.

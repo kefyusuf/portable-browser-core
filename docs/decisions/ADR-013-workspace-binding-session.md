@@ -1,6 +1,6 @@
 # ADR-013 — M10 workspace session over the JS bridge
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead on the post-roadmap candidate list); implemented on `feat/m10-workspace-binding-session`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #10, accepted head `1a4a83b`, CI run 40740275502). See the M10 milestone for the evidence index.
 
 ## Context
 
