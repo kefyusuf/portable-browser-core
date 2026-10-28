@@ -239,3 +239,131 @@ impl Workspace {
         }
     }
 }
+
+const WORKSPACE_MAGIC: &str = "browser-core-workspace\t1";
+
+/// Why workspace text could not be parsed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct WorkspaceParseError;
+
+impl WorkspaceParseError {
+    pub const fn as_str(self) -> &'static str {
+        "malformed_workspace"
+    }
+}
+
+impl Workspace {
+    /// Serializes the complete workspace state to deterministic text,
+    /// embedding each window's M6 container session verbatim. The core
+    /// performs no I/O; hosts own reading and writing the bytes.
+    pub fn to_workspace_text(&self) -> String {
+        let mut out = String::new();
+        out.push_str(WORKSPACE_MAGIC);
+        out.push('\n');
+        out.push_str("header\t");
+        out.push_str(&self.windows.len().to_string());
+        out.push('\t');
+        out.push_str(&self.next_id.to_string());
+        out.push('\t');
+        match self.active {
+            Some(id) => out.push_str(&id.to_string()),
+            None => out.push('-'),
+        }
+        out.push('\n');
+        for slot in &self.windows {
+            out.push_str("window\t");
+            out.push_str(&slot.id.to_string());
+            out.push('\n');
+            out.push_str(&slot.container.to_session_text());
+        }
+        out
+    }
+
+    /// Parses workspace text produced by `to_workspace_text`, validating the
+    /// envelope and every embedded M6 container block. Total: malformed
+    /// input yields `WorkspaceParseError`, never a panic.
+    pub fn from_workspace_text(text: &str) -> Result<Self, WorkspaceParseError> {
+        let mut lines: Vec<&str> = text.split('\n').collect();
+        if lines.last() == Some(&"") {
+            lines.pop();
+        }
+
+        if lines.first() != Some(&WORKSPACE_MAGIC) {
+            return Err(WorkspaceParseError);
+        }
+
+        let header: Vec<&str> = lines
+            .get(1)
+            .ok_or(WorkspaceParseError)?
+            .split('\t')
+            .collect();
+        if header.len() != 4 || header[0] != "header" {
+            return Err(WorkspaceParseError);
+        }
+        let window_count: usize = header[1].parse().map_err(|_| WorkspaceParseError)?;
+        let next_id: u64 = header[2].parse().map_err(|_| WorkspaceParseError)?;
+        let active: Option<u64> = match header[3] {
+            "-" => None,
+            value => Some(value.parse().map_err(|_| WorkspaceParseError)?),
+        };
+
+        let mut windows = Vec::with_capacity(window_count);
+        let mut cursor = 2usize;
+        for _ in 0..window_count {
+            let line = lines.get(cursor).ok_or(WorkspaceParseError)?;
+            let fields: Vec<&str> = line.split('\t').collect();
+            if fields.len() != 2 || fields[0] != "window" {
+                return Err(WorkspaceParseError);
+            }
+            let id: u64 = fields[1].parse().map_err(|_| WorkspaceParseError)?;
+            if windows.iter().any(|slot: &WindowSlot| slot.id == id) || id >= next_id {
+                return Err(WorkspaceParseError);
+            }
+
+            // The embedded container block is exactly the M6 session text:
+            // magic, container header (with the tab count), and tab lines.
+            let block_start = cursor + 1;
+            if lines.get(block_start) != Some(&super::container::SESSION_MAGIC) {
+                return Err(WorkspaceParseError);
+            }
+            let container_header: Vec<&str> = lines
+                .get(block_start + 1)
+                .ok_or(WorkspaceParseError)?
+                .split('\t')
+                .collect();
+            if container_header.len() != 4 || container_header[0] != "header" {
+                return Err(WorkspaceParseError);
+            }
+            let tab_count: usize = container_header[1]
+                .parse()
+                .map_err(|_| WorkspaceParseError)?;
+            let block_end = block_start + 2 + tab_count;
+            if block_end > lines.len() {
+                return Err(WorkspaceParseError);
+            }
+            let block = lines[block_start..block_end].join("\n");
+            let container =
+                TabContainer::from_session_text(&block).map_err(|_| WorkspaceParseError)?;
+
+            windows.push(WindowSlot { id, container });
+            cursor = block_end;
+        }
+
+        if cursor != lines.len() {
+            return Err(WorkspaceParseError);
+        }
+        match active {
+            None if !windows.is_empty() => return Err(WorkspaceParseError),
+            Some(id) if !windows.iter().any(|slot| slot.id == id) => {
+                return Err(WorkspaceParseError);
+            }
+            _ => {}
+        }
+
+        Ok(Self {
+            windows,
+            active,
+            next_id,
+        })
+    }
+}

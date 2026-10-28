@@ -43,5 +43,6 @@ The Cargo.lock file is checked in. CI uses --locked to reject unrecorded depende
 - **M8:** WASM host binding — **DONE** (accepted and merged 2026-10-27; PR #8, head `fec6208`).
 
 The a–e roadmap is complete. No further milestone is predefined; the next scope starts from the ADRs' explicitly out-of-scope lists (workspace session format, npm packaging, WebView adapter, per-entry titles, favicons).
+- **M9:** Workspace session format — **IN REVIEW**: implementation and golden fixtures on [PR #9](https://github.com/kefyusuf/portable-browser-core/pull/9) ([milestone](docs/milestones/M9-workspace-session.md), [ADR-012](docs/decisions/ADR-012-workspace-session.md)); embeds the M6 format verbatim.
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.

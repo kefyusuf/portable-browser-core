@@ -1,0 +1,23 @@
+# scenario<TAB>step<TAB>event<TAB>arg
+# ADR-012: one scenario replays on a fresh workspace; the harness then asserts
+# exact serialized bytes, parse-back view equality, and re-serialization identity.
+# event grammar mirrors workspace_transitions.tsv.
+full_workspace_roundtrip	1	new_window	-
+full_workspace_roundtrip	2	win:1:new_tab	https://a.test/
+full_workspace_roundtrip	3	win:1:tab:1:commit	-
+full_workspace_roundtrip	4	win:1:set_title:1	Example Domain
+full_workspace_roundtrip	5	new_window	-
+full_workspace_roundtrip	6	win:2:new_tab	https://b.test/
+full_workspace_roundtrip	7	win:2:tab:1:commit	-
+full_workspace_roundtrip	8	win:2:tab:1:reload	-
+empty_workspace	1	new_window	-
+empty_workspace	2	close_w:1	-
+reordered_tab_strip_preserved	1	new_window	-
+reordered_tab_strip_preserved	2	win:1:new_tab	-
+reordered_tab_strip_preserved	3	win:1:new_tab	-
+reordered_tab_strip_preserved	4	win:1:move:1:1	-
+reordered_tab_strip_preserved	5	win:1:set_title:2	Moved
+fresh_pending_while_background	1	new_window	-
+fresh_pending_while_background	2	new_window	-
+fresh_pending_while_background	3	activate_w:1	-
+fresh_pending_while_background	4	win:2:new_tab	https://b.test/
