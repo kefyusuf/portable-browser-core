@@ -1,6 +1,6 @@
 # M11 — Per-history-entry titles
 
-**State: IMPLEMENTING** — ADR-014 accepted 2026-10-27; implementation and regenerated fixtures on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-27.
 
 ## Deliverable
 
@@ -15,8 +15,8 @@ Titles become part of navigation history: each M2 entry remembers its own host-r
 - [x] Session format v2: container sessions are written as `browser-core-session\t2` — the tab line drops the tab-level title field and each entry field carries its title as `<escaped url>~<escaped title>` (escaper extended with `\~`). Readers accept v1 (all titles `None`) and v2; writers emit v2. Workspace embedding inherits v2 through the block magic, unchanged.
 - [x] `TabSnapshot` carries per-entry titles; `TabStateView` gains `title`.
 - [x] Golden fixtures regenerate under the new semantics with exact-count drift guards: M2 (70 rows / 12 scenarios, title component), M3 (60 rows, corrected title scenarios), M6 (18 steps at v2), M9 (20 steps at v2).
-- [ ] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile + Node binding tests) bound to the final exact PR head.
-- [ ] Independent acceptance of ADR-014 semantics for the final exact HEAD.
+- [x] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile + Node binding tests) bound to the final exact PR head. *(Core CI run [40768173285](https://github.com/kefyusuf/portable-browser-core/actions/runs/40768173285) PASS on head `b32dcdb`.)*
+- [x] Independent acceptance of ADR-014 semantics for the final exact HEAD. *(Maintainer accepted 2026-10-27 by approving the merge of PR #11. Semantics acceptance recorded 2026-10-27 in the design round; the local Windows verification record — including a local Node run — is in the PR evidence comment.)*
 
 ## Baseline/provenance
 

@@ -1,6 +1,6 @@
 # ADR-014 — M11 per-history-entry titles
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead); implemented on `feat/m11-per-entry-titles`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #11, accepted head `b32dcdb`, CI run 40768173285). See the M11 milestone for the evidence index. ADR-015 extends the same model to favicons.
 
 ## Context
 
