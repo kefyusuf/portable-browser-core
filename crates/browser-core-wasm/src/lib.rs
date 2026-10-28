@@ -78,6 +78,7 @@ fn workspace_snapshot(
             let _ = Reflect::set(&tab_obj, &"id".into(), &JsValue::from_f64(tab.id as f64));
             let _ = Reflect::set(&tab_obj, &"isActive".into(), &tab.is_active.into());
             set_optional_string(&tab_obj, "title", tab.title.as_deref());
+            set_optional_string(&tab_obj, "favicon", tab.favicon.as_deref());
             let _ = Reflect::set(
                 &tab_obj,
                 &"phase".into(),
@@ -248,6 +249,15 @@ impl WorkspaceBinding {
 
     pub fn container_set_title(&mut self, window: u64, tab: u64, title: Option<String>) -> JsValue {
         self.route(window, ContainerEvent::SetTitle(tab, title))
+    }
+
+    pub fn container_set_favicon(
+        &mut self,
+        window: u64,
+        tab: u64,
+        favicon: Option<String>,
+    ) -> JsValue {
+        self.route(window, ContainerEvent::SetFavicon(tab, favicon))
     }
 
     /// The M6 session text of the addressed window's container. Errors with

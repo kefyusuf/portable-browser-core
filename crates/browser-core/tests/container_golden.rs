@@ -36,7 +36,7 @@ fn assert_view(view: &ContainerView, cell: &str, row: usize) {
     assert_eq!(cells.len(), view.tabs.len(), "tab count at row {row}");
     for (cell, summary) in cells.iter().zip(view.tabs.iter()) {
         let parts: Vec<&str> = cell.split('|').collect();
-        assert_eq!(parts.len(), 7, "tab cell arity at row {row}");
+        assert_eq!(parts.len(), 8, "tab cell arity at row {row}");
         assert_eq!(
             summary.id,
             parts[0]
@@ -81,6 +81,11 @@ fn assert_view(view: &ContainerView, cell: &str, row: usize) {
             expected_option(parts[6]),
             "title at row {row}"
         );
+        assert_eq!(
+            summary.favicon.as_deref(),
+            expected_option(parts[7]),
+            "favicon at row {row}"
+        );
     }
 }
 
@@ -107,6 +112,8 @@ fn assert_noop(outcome: &ContainerOutcome, cell: &str, row: usize) {
                 ContainerNoOpReason::IndexOutOfRange,
                 ContainerNoOpReason::InvalidTitle,
                 ContainerNoOpReason::NothingToTitle,
+                ContainerNoOpReason::InvalidFavicon,
+                ContainerNoOpReason::NothingToFavicon,
             ]
             .into_iter()
             .find(|known| known.as_str() == reason)

@@ -25,10 +25,13 @@ pub enum ContainerEvent {
     /// Reposition the addressed tab so it sits at the target index
     /// (0-based) afterwards. Ids, load state, and history are untouched.
     MoveTab(u64, usize),
-    /// Set or clear the addressed tab's host-reported display title. The
-    /// last reported value is kept until the next report; navigation never
-    /// alters it.
+    /// Report the title of the page the event addresses (ADR-014): the
+    /// current entry in `Active`, the pending target in `Loading`. Nothing
+    /// to title in `Empty`.
     SetTitle(u64, Option<String>),
+    /// Report the favicon reference of the page the event addresses, with
+    /// the same phase retargeting as `SetTitle` (ADR-015).
+    SetFavicon(u64, Option<String>),
 }
 
 /// Why a container event produced no transition. The container is total:
@@ -43,6 +46,10 @@ pub enum ContainerNoOpReason {
     InvalidTitle,
     /// There is no history entry to attach a title to (ADR-014).
     NothingToTitle,
+    /// The reported favicon reference contains an ASCII control byte.
+    InvalidFavicon,
+    /// There is no history entry to attach a favicon to (ADR-015).
+    NothingToFavicon,
 }
 
 impl ContainerNoOpReason {
@@ -52,6 +59,8 @@ impl ContainerNoOpReason {
             Self::IndexOutOfRange => "index_out_of_range",
             Self::InvalidTitle => "invalid_title",
             Self::NothingToTitle => "nothing_to_title",
+            Self::InvalidFavicon => "invalid_favicon",
+            Self::NothingToFavicon => "nothing_to_favicon",
         }
     }
 }
@@ -65,6 +74,8 @@ pub struct TabSummary {
     /// The displayed title, derived from the machine (ADR-014): the current
     /// entry's title, or a title reported for the load in flight.
     pub title: Option<String>,
+    /// The displayed favicon reference, derived the same way (ADR-015).
+    pub favicon: Option<String>,
 }
 
 /// A read-only view of the container for hosts and fixtures.
@@ -132,6 +143,7 @@ impl TabContainer {
                         id: slot.id,
                         is_active: self.active == Some(slot.id),
                         title: state.title.clone(),
+                        favicon: state.favicon.clone(),
                         state,
                     }
                 })
@@ -147,6 +159,7 @@ impl TabContainer {
             ContainerEvent::Tab(id, tab_event) => self.route(id, tab_event),
             ContainerEvent::MoveTab(id, to_index) => self.move_tab(id, to_index),
             ContainerEvent::SetTitle(id, title) => self.set_title(id, title),
+            ContainerEvent::SetFavicon(id, favicon) => self.set_favicon(id, favicon),
         }
     }
 
@@ -256,6 +269,31 @@ impl TabContainer {
         self.finish(TabEffect::None, Some(outcome), noop)
     }
 
+    fn set_favicon(&mut self, id: u64, favicon: Option<String>) -> ContainerOutcome {
+        let Some(index) = self.slot_index(id) else {
+            return self.finish(TabEffect::None, None, Some(ContainerNoOpReason::UnknownTab));
+        };
+        if let Some(favicon) = &favicon {
+            if favicon.bytes().any(|byte| byte.is_ascii_control()) {
+                return self.finish(
+                    TabEffect::None,
+                    None,
+                    Some(ContainerNoOpReason::InvalidFavicon),
+                );
+            }
+        }
+        // ADR-015: the favicon belongs to the machine's history, exactly
+        // like the title.
+        let outcome = self.slots[index]
+            .machine
+            .handle(TabEvent::SetFavicon(favicon));
+        let noop = outcome
+            .noop
+            .filter(|reason| *reason == NoOpReason::NothingToFavicon)
+            .map(|_| ContainerNoOpReason::NothingToFavicon);
+        self.finish(TabEffect::None, Some(outcome), noop)
+    }
+
     fn slot_index(&self, id: u64) -> Option<usize> {
         self.slots.iter().position(|slot| slot.id == id)
     }
@@ -323,13 +361,26 @@ fn unescape_field(value: &str) -> Option<String> {
     Some(out)
 }
 
-/// One entry field in format v2: `<escaped url>` or
-/// `<escaped url>~<escaped title>`.
+/// One entry field in format v2: `<escaped url>[~<escaped title>[~<escaped
+/// favicon>]]` — trailing absent segments are omitted; empty segments read
+/// as `None`.
 fn write_entry_field(out: &mut String, entry: &EntrySnapshot) {
     out.push_str(&escape_field(&entry.url));
-    if let Some(title) = &entry.title {
-        out.push('~');
-        out.push_str(&escape_field(title));
+    match &entry.title {
+        Some(title) => {
+            out.push('~');
+            out.push_str(&escape_field(title));
+            if let Some(favicon) = &entry.favicon {
+                out.push('~');
+                out.push_str(&escape_field(favicon));
+            }
+        }
+        None => {
+            if let Some(favicon) = &entry.favicon {
+                out.push_str("~~");
+                out.push_str(&escape_field(favicon));
+            }
+        }
     }
 }
 
@@ -360,14 +411,33 @@ fn parse_v1_title_field(field: &str) -> Result<Option<String>, SessionParseError
     }
 }
 
+/// An empty segment reads as `None` (see `write_entry_field`).
+fn optional_segment(segment: &str) -> Result<Option<String>, SessionParseError> {
+    if segment.is_empty() {
+        return Ok(None);
+    }
+    unescape_field(segment).map(Some).ok_or(SessionParseError)
+}
+
 fn parse_entry_field(field: &str) -> Result<EntrySnapshot, SessionParseError> {
-    let (url, title) = split_unescaped_tilde(field);
+    let (url, rest) = split_unescaped_tilde(field);
+    let url = unescape_field(url).ok_or(SessionParseError)?;
+    let (title, favicon) = match rest {
+        None => (None, None),
+        Some(rest) => {
+            let (title, favicon) = split_unescaped_tilde(rest);
+            let title = optional_segment(title)?;
+            let favicon = match favicon {
+                None => None,
+                Some(favicon) => optional_segment(favicon)?,
+            };
+            (title, favicon)
+        }
+    };
     Ok(EntrySnapshot {
-        url: unescape_field(url).ok_or(SessionParseError)?,
-        title: match title {
-            None => None,
-            Some(title) => Some(unescape_field(title).ok_or(SessionParseError)?),
-        },
+        url,
+        title,
+        favicon,
     })
 }
 
@@ -401,12 +471,28 @@ impl TabContainer {
             match snapshot.pending {
                 None => out.push('-'),
                 Some(PendingSnapshot::Reload) => out.push_str("reload"),
-                Some(PendingSnapshot::Fresh { url, title }) => {
+                Some(PendingSnapshot::Fresh {
+                    url,
+                    title,
+                    favicon,
+                }) => {
                     out.push_str("fresh:");
                     out.push_str(&escape_field(&url));
-                    if let Some(title) = &title {
-                        out.push('~');
-                        out.push_str(&escape_field(title));
+                    match &title {
+                        Some(title) => {
+                            out.push('~');
+                            out.push_str(&escape_field(title));
+                            if let Some(favicon) = &favicon {
+                                out.push('~');
+                                out.push_str(&escape_field(favicon));
+                            }
+                        }
+                        None => {
+                            if let Some(favicon) = &favicon {
+                                out.push_str("~~");
+                                out.push_str(&escape_field(favicon));
+                            }
+                        }
                     }
                 }
             }
@@ -482,13 +568,24 @@ impl TabContainer {
                         .strip_prefix("fresh:")
                         .ok_or(SessionParseError)?
                         .to_owned();
-                    let (url, title) = split_unescaped_tilde(&rest);
+                    let (url, rest) = split_unescaped_tilde(&rest);
+                    let url = unescape_field(url).ok_or(SessionParseError)?;
+                    let (title, favicon) = match rest {
+                        None => (None, None),
+                        Some(rest) => {
+                            let (title, favicon) = split_unescaped_tilde(rest);
+                            let title = optional_segment(title)?;
+                            let favicon = match favicon {
+                                None => None,
+                                Some(favicon) => optional_segment(favicon)?,
+                            };
+                            (title, favicon)
+                        }
+                    };
                     Some(PendingSnapshot::Fresh {
-                        url: unescape_field(url).ok_or(SessionParseError)?,
-                        title: match title {
-                            None => None,
-                            Some(title) => Some(unescape_field(title).ok_or(SessionParseError)?),
-                        },
+                        url,
+                        title,
+                        favicon,
                     })
                 }
             };
@@ -499,6 +596,7 @@ impl TabContainer {
                         Ok(EntrySnapshot {
                             url: unescape_field(field).ok_or(SessionParseError)?,
                             title: None,
+                            favicon: None,
                         })
                     } else {
                         parse_entry_field(field)
