@@ -1,6 +1,6 @@
 # ADR-012 — M9 workspace session format
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead, first post-roadmap scope); implemented on `feat/m9-workspace-session`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #9, accepted head `f97e108`, CI run 40589834518). See the M9 milestone for the evidence index. ADR-013 later exposes this format over the M8 JS bridge.
 
 ## Context
 

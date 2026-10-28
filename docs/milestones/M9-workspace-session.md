@@ -1,6 +1,6 @@
 # M9 — Workspace session format
 
-**State: IMPLEMENTING** — semantics accepted 2026-10-27; implementation and fixtures on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-27.
 
 ## Deliverable
 
@@ -14,8 +14,8 @@ A deterministic, dependency-free text serialization of the whole workspace and a
 - [x] The embedded M6 container block is accepted unchanged: no re-encoding, no drift between the two formats.
 - [x] Serialization adds no dependency (no serde, no I/O in the core).
 - [x] Golden workspace-session scenarios exist with exact-count drift guards and exact-bytes expectations (4 scenarios, 19 steps; source inspection until CI).
-- [ ] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head.
-- [ ] Independent acceptance of ADR-012 semantics for the final exact HEAD.
+- [x] Multi-platform CI green (Linux/macOS/Windows `fmt`, locked tests, Clippy; Ubuntu locked WASM compile) bound to the final exact PR head. *(Core CI run [40589834518](https://github.com/kefyusuf/portable-browser-core/actions/runs/40589834518) PASS on head `f97e108`.)*
+- [x] Independent acceptance of ADR-012 semantics for the final exact HEAD. *(Maintainer accepted 2026-10-27 by approving the merge of PR #9. Semantics acceptance recorded 2026-10-27 as the first post-roadmap scope; the local Windows verification record is in the PR evidence comment.)*
 
 ## Baseline/provenance
 
