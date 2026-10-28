@@ -1,6 +1,6 @@
 # ADR-014 — M11 per-history-entry titles
 
-**Status:** Proposed for M11 — this milestone changes accepted M2/M5 semantics and bumps the session format, so it requires explicit maintainer acceptance before implementation.
+**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead); implemented on `feat/m11-per-entry-titles`. Milestone evidence (multi-platform CI and independent acceptance) pending.
 
 ## Context
 
