@@ -273,6 +273,24 @@ impl WorkspaceBinding {
         }
     }
 
+    /// The ADR-012 session text of the whole workspace.
+    pub fn workspace_session_text(&self) -> String {
+        self.workspace.to_workspace_text()
+    }
+
+    /// Replaces the whole workspace from ADR-012 session text — window ids,
+    /// tab ids, and both id counters come from the text. Errors with
+    /// `"malformed_workspace"`; never throws for structurally invalid input.
+    pub fn workspace_set_session_text(&mut self, text: &str) -> Result<JsValue, JsValue> {
+        match Workspace::from_workspace_text(text) {
+            Ok(workspace) => {
+                self.workspace = workspace;
+                Ok(self.snapshot())
+            }
+            Err(error) => Err(error.as_str().into()),
+        }
+    }
+
     fn handle(&mut self, event: WorkspaceEvent) -> JsValue {
         let outcome = self.workspace.handle(event);
         workspace_snapshot(
