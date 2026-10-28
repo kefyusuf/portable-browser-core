@@ -321,9 +321,14 @@ impl Workspace {
             }
 
             // The embedded container block is exactly the M6 session text:
-            // magic, container header (with the tab count), and tab lines.
+            // magic (v1 or v2 — readers accept both per ADR-014), container
+            // header (with the tab count), and tab lines.
             let block_start = cursor + 1;
-            if lines.get(block_start) != Some(&super::container::SESSION_MAGIC) {
+            let magic_ok = matches!(
+                lines.get(block_start),
+                Some(&super::container::SESSION_MAGIC) | Some(&super::container::SESSION_MAGIC_V1)
+            );
+            if !magic_ok {
                 return Err(WorkspaceParseError);
             }
             let container_header: Vec<&str> = lines

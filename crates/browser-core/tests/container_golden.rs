@@ -105,6 +105,8 @@ fn assert_noop(outcome: &ContainerOutcome, cell: &str, row: usize) {
             let known = [
                 ContainerNoOpReason::UnknownTab,
                 ContainerNoOpReason::IndexOutOfRange,
+                ContainerNoOpReason::InvalidTitle,
+                ContainerNoOpReason::NothingToTitle,
             ]
             .into_iter()
             .find(|known| known.as_str() == reason)
@@ -218,7 +220,7 @@ fn container_golden_matrix() {
     }
 
     assert_eq!(scenario_count, 13, "fixture scenario count drift");
-    assert_eq!(checked, 59, "fixture row count drift");
+    assert_eq!(checked, 60, "fixture row count drift");
 }
 
 #[test]
@@ -332,23 +334,37 @@ fn reorder_moves_load_state_with_the_identity() {
 }
 
 #[test]
-fn title_persists_across_navigation_until_reported() {
-    // ADR-008: the title is the last host-reported value; navigation never
-    // alters or clears it.
+fn title_resets_on_commit_until_reported() {
+    // ADR-014: the title belongs to the entry. A title reported mid-load
+    // travels into the pending entry at commit; after committing a NEW page
+    // the displayed title is the new entry's title until reported; back
+    // shows the landed entry's remembered title.
     let mut container = TabContainer::new();
     container.handle(ContainerEvent::NewTab(Some("https://a.test/".into())));
     container.handle(ContainerEvent::Tab(1, TabEvent::Commit));
     container.handle(ContainerEvent::SetTitle(1, Some("Example Domain".into())));
+
     container.handle(ContainerEvent::Tab(
         1,
         TabEvent::Navigate("https://b.test/".into()),
     ));
+    container.handle(ContainerEvent::SetTitle(1, Some("Pending Title".into())));
     let outcome = container.handle(ContainerEvent::Tab(1, TabEvent::Commit));
     let tab = outcome.view.tabs.first().expect("tab 1 exists");
     assert_eq!(tab.state.current_url.as_deref(), Some("https://b.test/"));
-    assert_eq!(tab.title.as_deref(), Some("Example Domain"));
+    assert_eq!(tab.title.as_deref(), Some("Pending Title"));
 
-    let outcome = container.handle(ContainerEvent::SetTitle(1, None));
+    container.handle(ContainerEvent::Tab(
+        1,
+        TabEvent::Navigate("https://c.test/".into()),
+    ));
+    let outcome = container.handle(ContainerEvent::Tab(1, TabEvent::Commit));
     let tab = outcome.view.tabs.first().expect("tab 1 exists");
+    assert_eq!(tab.state.current_url.as_deref(), Some("https://c.test/"));
     assert_eq!(tab.title, None);
+
+    let outcome = container.handle(ContainerEvent::Tab(1, TabEvent::Back));
+    let tab = outcome.view.tabs.first().expect("tab 1 exists");
+    assert_eq!(tab.state.current_url.as_deref(), Some("https://b.test/"));
+    assert_eq!(tab.title.as_deref(), Some("Pending Title"));
 }

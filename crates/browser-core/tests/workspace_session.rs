@@ -149,7 +149,7 @@ fn workspace_session_matrix() {
     }
 
     assert_eq!(seen.len(), 4, "M9 fixture scenario count drift");
-    assert_eq!(checked, 19, "M9 fixture row count drift");
+    assert_eq!(checked, 20, "M9 fixture row count drift");
 }
 
 fn expected_sessions() -> Vec<(&'static str, String)> {
@@ -160,13 +160,13 @@ fn expected_sessions() -> Vec<(&'static str, String)> {
                 "browser-core-workspace\t1",
                 "header\t2\t3\t2",
                 "window\t1",
-                "browser-core-session\t1",
+                "browser-core-session\t2",
                 "header\t1\t2\t1",
-                "tab\t1\tt:Example Domain\t0\t-\thttps://a.test/",
+                "tab\t1\t0\t-\thttps://a.test/~Example Domain",
                 "window\t2",
-                "browser-core-session\t1",
+                "browser-core-session\t2",
                 "header\t1\t2\t1",
-                "tab\t1\t-\t0\treload\thttps://b.test/",
+                "tab\t1\t0\treload\thttps://b.test/",
             ]
             .join("\n")
                 + "\n",
@@ -181,10 +181,10 @@ fn expected_sessions() -> Vec<(&'static str, String)> {
                 "browser-core-workspace\t1",
                 "header\t1\t2\t1",
                 "window\t1",
-                "browser-core-session\t1",
+                "browser-core-session\t2",
                 "header\t2\t3\t2",
-                "tab\t2\tt:Moved\t-\t-",
-                "tab\t1\t-\t-\t-",
+                "tab\t2\t0\t-\thttps://b.test/~Moved",
+                "tab\t1\t-\t-",
             ]
             .join("\n")
                 + "\n",
@@ -195,12 +195,12 @@ fn expected_sessions() -> Vec<(&'static str, String)> {
                 "browser-core-workspace\t1",
                 "header\t2\t3\t1",
                 "window\t1",
-                "browser-core-session\t1",
+                "browser-core-session\t2",
                 "header\t0\t1\t-",
                 "window\t2",
-                "browser-core-session\t1",
+                "browser-core-session\t2",
                 "header\t1\t2\t1",
-                "tab\t1\t-\t-\tfresh:https://b.test/",
+                "tab\t1\t-\tfresh:https://b.test/",
             ]
             .join("\n")
                 + "\n",
@@ -218,8 +218,17 @@ fn workspace_session_of_fresh_workspace_is_pinned() {
 
 #[test]
 fn workspace_parser_rejects_malformed_sessions() {
-    let ok = "browser-core-workspace\t1\nheader\t1\t2\t1\nwindow\t1\nbrowser-core-session\t1\nheader\t0\t1\t-\n";
+    let ok = "browser-core-workspace\t1\nheader\t1\t2\t1\nwindow\t1\nbrowser-core-session\t2\nheader\t0\t1\t-\n";
     assert!(Workspace::from_workspace_text(ok).is_ok());
+
+    // v1 container blocks remain readable inside the workspace envelope.
+    let v1_embedded = "browser-core-workspace\t1\nheader\t1\t2\t1\nwindow\t1\nbrowser-core-session\t1\nheader\t1\t2\t1\ntab\t1\t-\t0\t-\thttps://a.test/\n";
+    let workspace = Workspace::from_workspace_text(v1_embedded).expect("v1 block parses");
+    assert_eq!(
+        workspace.state().windows[0].container.tabs[0].title,
+        None,
+        "v1 blocks carry no titles"
+    );
 
     let cases: [(&str, &str); 8] = [
         ("bad magic", "browser-core-workspace\t2\nheader\t0\t1\t-\n"),
@@ -230,15 +239,15 @@ fn workspace_parser_rejects_malformed_sessions() {
         ),
         (
             "duplicate window ids",
-            "browser-core-workspace\t1\nheader\t2\t3\t1\nwindow\t1\nbrowser-core-session\t1\nheader\t0\t1\t-\nwindow\t1\nbrowser-core-session\t1\nheader\t0\t1\t-\n",
+            "browser-core-workspace\t1\nheader\t2\t3\t1\nwindow\t1\nbrowser-core-session\t2\nheader\t0\t1\t-\nwindow\t1\nbrowser-core-session\t2\nheader\t0\t1\t-\n",
         ),
         (
             "window id at or above counter",
-            "browser-core-workspace\t1\nheader\t1\t1\t1\nwindow\t1\nbrowser-core-session\t1\nheader\t0\t1\t-\n",
+            "browser-core-workspace\t1\nheader\t1\t1\t1\nwindow\t1\nbrowser-core-session\t2\nheader\t0\t1\t-\n",
         ),
         (
             "malformed embedded container",
-            "browser-core-workspace\t1\nheader\t1\t2\t1\nwindow\t1\nbrowser-core-session\t1\nheader\t1\t2\t1\ntab\t1\t-\t3\t-\thttps://a.test/\n",
+            "browser-core-workspace\t1\nheader\t1\t2\t1\nwindow\t1\nbrowser-core-session\t2\nheader\t1\t2\t1\ntab\t1\t3\t-\thttps://a.test/\n",
         ),
         (
             "missing embedded magic",

@@ -10,7 +10,7 @@ fn expected_option(cell: &str) -> Option<&str> {
 
 fn assert_state(outcome: &TabOutcome, cell: &str, row: usize) {
     let parts: Vec<&str> = cell.split('|').collect();
-    assert_eq!(parts.len(), 5, "state cell arity at row {row}");
+    assert_eq!(parts.len(), 6, "state cell arity at row {row}");
     let expected_phase = match parts[0] {
         "empty" => TabPhase::Empty,
         "loading" => TabPhase::Loading,
@@ -38,6 +38,11 @@ fn assert_state(outcome: &TabOutcome, cell: &str, row: usize) {
         parts[4] == "1",
         "can_forward at row {row}"
     );
+    assert_eq!(
+        outcome.state.title.as_deref(),
+        expected_option(parts[5]),
+        "title at row {row}"
+    );
 }
 
 fn assert_effect(outcome: &TabOutcome, cell: &str, row: usize) {
@@ -62,6 +67,7 @@ fn assert_noop(outcome: &TabOutcome, cell: &str, row: usize) {
                 NoOpReason::UnexpectedEvent,
                 NoOpReason::AtBoundary,
                 NoOpReason::NothingToReload,
+                NoOpReason::NothingToTitle,
             ]
             .into_iter()
             .find(|known| known.as_str() == reason)
@@ -118,6 +124,7 @@ fn tab_golden_matrix() {
             "back" => TabEvent::Back,
             "forward" => TabEvent::Forward,
             "reload" => TabEvent::Reload,
+            "set_title" => TabEvent::SetTitle(expected_option(arg).map(str::to_owned)),
             other => panic!("unknown event {other:?} at row {}", index + 1),
         };
 
@@ -128,8 +135,8 @@ fn tab_golden_matrix() {
         checked += 1;
     }
 
-    assert_eq!(scenario_count, 10, "M2 fixture scenario count drift");
-    assert_eq!(checked, 55, "M2 fixture row count drift");
+    assert_eq!(scenario_count, 12, "M2 fixture scenario count drift");
+    assert_eq!(checked, 70, "M2 fixture row count drift");
 }
 
 #[test]

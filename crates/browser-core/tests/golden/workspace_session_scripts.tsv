@@ -14,9 +14,10 @@ empty_workspace	1	new_window	-
 empty_workspace	2	close_w:1	-
 reordered_tab_strip_preserved	1	new_window	-
 reordered_tab_strip_preserved	2	win:1:new_tab	-
-reordered_tab_strip_preserved	3	win:1:new_tab	-
-reordered_tab_strip_preserved	4	win:1:move:1:1	-
-reordered_tab_strip_preserved	5	win:1:set_title:2	Moved
+reordered_tab_strip_preserved	3	win:1:new_tab	https://b.test/
+reordered_tab_strip_preserved	4	win:1:tab:2:commit	-
+reordered_tab_strip_preserved	5	win:1:move:2:0	-
+reordered_tab_strip_preserved	6	win:1:set_title:2	Moved
 fresh_pending_while_background	1	new_window	-
 fresh_pending_while_background	2	new_window	-
 fresh_pending_while_background	3	activate_w:1	-
