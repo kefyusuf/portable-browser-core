@@ -185,3 +185,33 @@ fn session_passthrough_round_trips() {
         .expect_err("unknown window");
     assert_eq!(error.as_string(), Some("unknown_window".to_owned()));
 }
+
+#[wasm_bindgen_test]
+fn workspace_session_passthrough_round_trips() {
+    let mut workspace = WorkspaceBinding::new();
+    workspace.new_window();
+    workspace.container_new_tab(1, Some("https://a.test/".into()));
+    workspace.container_commit(1, 1);
+    workspace.container_set_title(1, 1, Some("Example Domain".into()));
+
+    let text = workspace.workspace_session_text();
+    assert!(text.starts_with("browser-core-workspace\t1"));
+
+    // Restore into a fresh binding from the same text; identity holds.
+    let mut fresh = WorkspaceBinding::new();
+    fresh
+        .workspace_set_session_text(&text)
+        .expect("workspace text is well-formed");
+    assert_eq!(fresh.workspace_session_text(), text);
+    let snapshot = fresh.snapshot();
+    assert_eq!(num_of(&snapshot, "activeWindowId"), 1.0);
+    let tab = tab_at(&snapshot, 0, 0);
+    assert_eq!(str_of(&tab, "title"), Some("Example Domain".into()));
+    assert_eq!(str_of(&tab, "currentUrl"), Some("https://a.test/".into()));
+
+    // Malformed text is rejected as a result, not an exception.
+    let error = fresh
+        .workspace_set_session_text("garbage")
+        .expect_err("malformed workspace");
+    assert_eq!(error.as_string(), Some("malformed_workspace".to_owned()));
+}
