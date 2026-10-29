@@ -1,8 +1,13 @@
 # Portable Browser Core
 
-A platform-independent browser decision core. The current executable slice is deterministic address/navigation resolution in Rust.
+A platform-independent browser decision core: deterministic navigation
+resolution, per-tab lifecycle and history, a tab strip with session
+persistence, and a window set — pure and synchronous in Rust, bridged to
+JavaScript via WASM. See [docs/architecture.md](docs/architecture.md) for
+the crate map and layer diagram, and [CHANGELOG.md](CHANGELOG.md) for the
+milestone history.
 
-**Status:** M1 **DONE** — accepted and merged 2026-10-25 (PR #1, accepted head `9779823`, merge commit `17cf8c7`, [CI run 40220530561](https://github.com/kefyusuf/portable-browser-core/actions/runs/40220530561)).
+**Status:** M1–M15 **DONE** — the full in-repo milestone sequence (navigation core → tab machine → tab strip → sessions → window set → JS bridge → packaging) is accepted, merged, and CI-verified. Per-milestone evidence lives in each milestone document and its PR; next scopes (WebView adapter, license, publishing) await maintainer decisions.
 
 ## Frozen boundary
 
