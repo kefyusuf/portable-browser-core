@@ -1,6 +1,6 @@
 # ADR-017 — M14 browser target outputs
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead on the candidate list); implemented on `feat/m14-browser-targets`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #14, accepted head `df83d62`, CI run 40912565912). See the M14 milestone for the evidence index.
 
 ## Context
 

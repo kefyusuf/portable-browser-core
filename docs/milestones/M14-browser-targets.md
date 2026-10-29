@@ -1,6 +1,6 @@
 # M14 — Browser target outputs
 
-**State: IMPLEMENTING** — ADR-017 accepted 2026-10-27; implementation on the branch (three-target assembly + structural verification verified locally), CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-27.
 
 ## Deliverable
 
@@ -13,8 +13,8 @@ The npm package gains `bundler` and `web` target outputs alongside the existing 
 - [x] A checked-in structural verification script (Node) asserts, for every target, that the glue and `.wasm` exist and the glue exposes the bridge's public surface (`resolve_navigation`, `WorkspaceBinding` with the flat method set). The bundler flavor splits the class into `browser_core_wasm_bg.js`, so the name check scans every `.js` file in the target directory.
 - [x] The existing nodejs smoke test keeps passing unchanged (require path moved to `pkg/nodejs/`).
 - [x] No new Rust dependencies; no committed generated artifacts.
-- [ ] Multi-platform CI green bound to the final exact PR head (existing gates unchanged, plus the extended packaging step).
-- [ ] Independent acceptance of ADR-017 for the final exact HEAD.
+- [x] Multi-platform CI green bound to the final exact PR head (existing gates unchanged, plus the extended packaging step). *(Core CI run [40912565912](https://github.com/kefyusuf/portable-browser-core/actions/runs/40912565912) PASS on head `df83d62`; Verify multi-target package structure step success.)*
+- [x] Independent acceptance of ADR-017 for the final exact HEAD. *(Maintainer accepted 2026-10-27 by approving the merge of PR #14. Semantics acceptance recorded 2026-10-27 in the design round; the local Windows verification record — including a local three-target assembly and verification run — is in the PR evidence comment.)*
 
 ## Baseline/provenance
 
