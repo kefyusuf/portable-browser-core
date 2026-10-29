@@ -1,6 +1,6 @@
 # ADR-019 — Agentic purpose and the observation contract
 
-**Status:** Semantics accepted 2026-10-29 (maintainer decision, "onaylı devam"); implemented on `feat/m17-agentic-observation`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-29 (PR #17, accepted head `e9afe27`, CI run 40942369390). See the M17 milestone for the evidence index.
 
 ## Context
 

@@ -1,6 +1,6 @@
 # M17 — Agentic purpose and the observation contract
 
-**State: IMPLEMENTING** — ADR-019 accepted 2026-10-29; implementation on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-29.
 
 ## Deliverable
 
@@ -12,8 +12,8 @@ The project purpose (agents/LLMs; headless vs headed is the host's choice) becom
 - [ ] `Workspace::observe_text()` renders the deterministic observation text (window/tab lines, quoted titles/favicons, phase-derived `actions=` lists, `-` for empty).
 - [ ] The rendering is total and deterministic; exact bytes are pinned by a golden test over scripted scenarios (multi-window, titles, favicons, pending loads, empty strip).
 - [ ] `WorkspaceBinding::observe_text()` exposes it over the bridge; the structured snapshot is unchanged.
-- [ ] Multi-platform CI green bound to the final exact PR head (3-OS Rust + Ubuntu cdylib build + Node binding tests).
-- [ ] Independent acceptance of ADR-019 for the final exact HEAD.
+- [x] Multi-platform CI green bound to the final exact PR head (3-OS Rust + Ubuntu cdylib build + Node binding tests). *(Core CI run [40942369390](https://github.com/kefyusuf/portable-browser-core/actions/runs/40942369390) PASS on head `e9afe27`.)*
+- [x] Independent acceptance of ADR-019 for the final exact HEAD. *(Maintainer accepted 2026-10-29 by approving the merge of PR #17; the purpose decision itself was stated by the maintainer the same day. The local Windows verification record — including a local Node run of the extended suite — is in the PR evidence comment.)*
 
 ## Baseline/provenance
 

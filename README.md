@@ -10,7 +10,7 @@ observation text (`observe_text()`, ADR-019). See [docs/architecture.md](docs/ar
 the crate map and layer diagram, and [CHANGELOG.md](CHANGELOG.md) for the
 milestone history.
 
-**Status:** M1–M15 **DONE** — the full in-repo milestone sequence (navigation core → tab machine → tab strip → sessions → window set → JS bridge → packaging) is accepted, merged, and CI-verified. Per-milestone evidence lives in each milestone document and its PR; next scopes (WebView adapter, license, publishing) await maintainer decisions.
+**Status:** M1–M17 **DONE** — the in-repo milestone sequence (navigation core → tab machine → tab strip → sessions → window set → JS bridge → packaging → docs → agentic observation) is accepted, merged, and CI-verified. Per-milestone evidence lives in each milestone document and its PR; next scopes (WebView adapter, license, publishing) await maintainer decisions.
 
 ## Frozen boundary
 
@@ -58,5 +58,7 @@ The a–e roadmap is complete. No further milestone is predefined; the next scop
 - **M13:** npm packaging (preparation) — **DONE** (accepted and merged 2026-10-27; PR #13, head `c45be01`).
 - **M14:** Browser target outputs — **DONE** (accepted and merged 2026-10-27; PR #14, head `df83d62`).
 - **M15:** Window reordering — **DONE** (accepted and merged 2026-10-29; PR #15, head `4afe22d`).
+- **M16:** Documentation consolidation — **DONE** (accepted and merged 2026-10-29; PR #16, head `c642b29`).
+- **M17:** Agentic purpose and observation text — **DONE** (accepted and merged 2026-10-29; PR #17, head `e9afe27`).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.

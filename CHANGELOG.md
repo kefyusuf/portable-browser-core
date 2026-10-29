@@ -4,6 +4,19 @@ All notable changes to the portable browser decision core. Milestone evidence
 (PR number, accepted head, CI run) is recorded per entry and in each
 milestone document under `docs/milestones/`.
 
+## M17 — Agentic purpose and the observation text (2026-10-29)
+
+The project purpose becomes first-class: the core is the browser decision
+layer for agents and LLMs; headless vs headed is the host's choice.
+`Workspace::observe_text()` — a deterministic, token-efficient observation
+with phase-derived per-tab action lists — exposed over the bridge as
+`observe_text()`. (PR #17, head `e9afe27`, ADR-019.)
+
+## M16 — Documentation consolidation (2026-10-29)
+
+`CHANGELOG.md` (this file) and `docs/architecture.md` — crate map, layer
+diagram, API surface, verification instructions. (PR #16, head `c642b29`.)
+
 ## M15 — Window reordering (2026-10-29)
 
 `WorkspaceEvent::MoveWindow(id, to_index)` — the tab-reordering rule
