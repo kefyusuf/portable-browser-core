@@ -1,6 +1,6 @@
 # M13 — npm packaging (preparation)
 
-**State: IMPLEMENTING** — ADR-016 accepted 2026-10-27; implementation on the branch (pkg assembly + smoke test verified locally), CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-27.
 
 ## Deliverable
 
@@ -13,8 +13,8 @@ A reproducible npm package assembly for the M8 bridge: a checked-in package mani
 - [x] A Node smoke test imports the assembled package and exercises it end-to-end: navigation classification, a workspace lifecycle (window → tab → commit → title), and an effect surfacing — failing the build on any mismatch.
 - [x] The generated `pkg/` directory is git-ignored; nothing generated is committed.
 - [x] No new Rust dependencies; the only new tool usage is the already-pinned `wasm-bindgen-cli`.
-- [ ] Multi-platform CI green bound to the final exact PR head (existing gates unchanged, plus the packaging step).
-- [ ] Independent acceptance of ADR-016 for the final exact HEAD.
+- [x] Multi-platform CI green bound to the final exact PR head (existing gates unchanged, plus the packaging step). *(Core CI run [40780409894](https://github.com/kefyusuf/portable-browser-core/actions/runs/40780409894) PASS on head `c45be01`; Assemble npm package and npm package smoke test steps success.)*
+- [x] Independent acceptance of ADR-016 for the final exact HEAD. *(Maintainer accepted 2026-10-27 by approving the merge of PR #13. Semantics acceptance recorded 2026-10-27 as the fourth post-roadmap item; the local Windows verification record — including a local pkg assembly and smoke run — is in the PR evidence comment.)*
 
 ## Baseline/provenance
 

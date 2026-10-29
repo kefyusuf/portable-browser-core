@@ -1,6 +1,6 @@
 # ADR-016 — M13 npm packaging (preparation)
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead on the candidate list); implemented on `feat/m13-npm-packaging`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-27 (PR #13, accepted head `c45be01`, CI run 40780409894). See the M13 milestone for the evidence index. ADR-017 later adds the browser target outputs.
 
 **Implementation refinements (recorded 2026-10-27):** the generated glue exposes the Rust names verbatim (snake_case — `resolve_navigation`, `new_window`, …); camelCase aliasing stays a later decision for when a consumer exists. Binding id parameters are narrowed to **u32** (plain JS Numbers), widened losslessly to the core's `u64` — the packaging smoke test surfaced the BigInt friction of u64 parameters, and Numbers keep the JS surface symmetric (ids also serialize as Numbers in snapshots).
 
