@@ -38,6 +38,7 @@ const publicNames = [
   'container_set_favicon',
   'container_session_text',
   'workspace_session_text',
+  'observe_text',
 ];
 
 for (const [target, files] of Object.entries(targets)) {

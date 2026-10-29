@@ -214,6 +214,26 @@ fn favicon_flows_through_the_bridge() {
 }
 
 #[wasm_bindgen_test]
+fn observation_text_flows_through_the_bridge() {
+    let mut workspace = WorkspaceBinding::new();
+    workspace.new_window();
+    workspace.container_new_tab(1, "https://a.test/");
+    let text = workspace.observe_text();
+    assert!(
+        text.contains("tab 1 loading url=https://a.test/ actions=navigate,commit,fail,stop,set_title,set_favicon"),
+        "observation text carries the loading tab with its actions"
+    );
+    workspace.container_commit(1, 1);
+    let text = workspace.observe_text();
+    assert!(
+        text.contains(
+            "tab 1 active url=https://a.test/ actions=reload,navigate,set_title,set_favicon"
+        ),
+        "observation text reflects the committed state"
+    );
+}
+
+#[wasm_bindgen_test]
 fn workspace_session_passthrough_round_trips() {
     let mut workspace = WorkspaceBinding::new();
     workspace.new_window();
