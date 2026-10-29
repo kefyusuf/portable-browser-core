@@ -313,6 +313,12 @@ impl WorkspaceBinding {
         }
     }
 
+    /// The agent observation text (ADR-019): a deterministic, compact,
+    /// token-efficient projection of the workspace for LLM prompts.
+    pub fn observe_text(&self) -> String {
+        self.workspace.observe_text()
+    }
+
     /// The ADR-012 session text of the whole workspace.
     pub fn workspace_session_text(&self) -> String {
         self.workspace.to_workspace_text()

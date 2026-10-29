@@ -6,7 +6,7 @@
 //! workspace never performs a load.
 
 use super::container::{ContainerEvent, ContainerOutcome, ContainerView, TabContainer};
-use super::tab::TabEffect;
+use super::tab::{TabEffect, TabPhase};
 
 /// An event the host submits to the workspace.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -288,6 +288,70 @@ impl Workspace {
     /// Serializes the complete workspace state to deterministic text,
     /// embedding each window's M6 container session verbatim. The core
     /// performs no I/O; hosts own reading and writing the bytes.
+    /// The agent observation text (ADR-019): a deterministic, compact,
+    /// token-efficient projection of the workspace for LLM prompts. Line 1
+    /// summarizes the strip; one line per window; one line per tab with its
+    /// phase, URLs, quoted title/favicon, and the phase-derived list of
+    /// actions the agent may take next.
+    pub fn observe_text(&self) -> String {
+        let mut out = String::new();
+        out.push_str("workspace windows=");
+        out.push_str(&self.windows.len().to_string());
+        out.push_str(" active=");
+        match self.active {
+            Some(id) => out.push_str(&id.to_string()),
+            None => out.push('-'),
+        }
+        out.push('\n');
+        for slot in &self.windows {
+            let view = slot.container.state();
+            out.push_str("window ");
+            out.push_str(&slot.id.to_string());
+            if self.active == Some(slot.id) {
+                out.push_str(" [active]");
+            }
+            out.push('\n');
+            for tab in &view.tabs {
+                let phase = match tab.state.phase {
+                    TabPhase::Empty => "empty",
+                    TabPhase::Loading => "loading",
+                    TabPhase::Active => "active",
+                };
+                out.push_str("  tab ");
+                out.push_str(&tab.id.to_string());
+                out.push(' ');
+                out.push_str(phase);
+                if let Some(url) = &tab.state.current_url {
+                    out.push_str(" url=");
+                    out.push_str(url);
+                }
+                if tab.state.phase == TabPhase::Loading {
+                    if let Some(pending) = &tab.state.pending_url {
+                        out.push_str(" pending=");
+                        out.push_str(pending);
+                    }
+                }
+                if let Some(title) = &tab.title {
+                    out.push_str(" title=");
+                    out.push_str(&quote_observation_value(title));
+                }
+                if let Some(favicon) = &tab.favicon {
+                    out.push_str(" favicon=");
+                    out.push_str(&quote_observation_value(favicon));
+                }
+                out.push_str(" actions=");
+                let actions = tab_actions(tab);
+                if actions.is_empty() {
+                    out.push('-');
+                } else {
+                    out.push_str(&actions.join(","));
+                }
+                out.push('\n');
+            }
+        }
+        out
+    }
+
     pub fn to_workspace_text(&self) -> String {
         let mut out = String::new();
         out.push_str(WORKSPACE_MAGIC);
@@ -403,4 +467,45 @@ impl Workspace {
             next_id,
         })
     }
+}
+
+/// The phase-derived list of actions an agent may take on a tab next, in
+/// fixed order (ADR-019).
+fn tab_actions(tab: &super::container::TabSummary) -> Vec<&'static str> {
+    let mut actions = Vec::new();
+    if tab.state.can_back {
+        actions.push("back");
+    }
+    if tab.state.can_forward {
+        actions.push("forward");
+    }
+    if tab.state.phase == TabPhase::Active {
+        actions.push("reload");
+    }
+    actions.push("navigate");
+    if tab.state.phase == TabPhase::Loading {
+        actions.push("commit");
+        actions.push("fail");
+        actions.push("stop");
+    }
+    if tab.state.phase != TabPhase::Empty {
+        actions.push("set_title");
+        actions.push("set_favicon");
+    }
+    actions
+}
+
+/// Titles and favicons render double-quoted with `"` and `\` escaped.
+fn quote_observation_value(value: &str) -> String {
+    let mut out = String::with_capacity(value.len() + 2);
+    out.push('"');
+    for character in value.chars() {
+        match character {
+            '"' => out.push_str("\\\""),
+            '\\' => out.push_str("\\\\"),
+            other => out.push(other),
+        }
+    }
+    out.push('"');
+    out
 }

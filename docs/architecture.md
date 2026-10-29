@@ -1,11 +1,18 @@
 # Architecture
 
-The repository is a **platform-independent browser decision core**: it
-resolves commands into deterministic decisions and effect *requests* — it
-owns no OS APIs, no UI, no WebView, no filesystem, no networking. Hosts
-execute; the core decides. Every layer is pure, synchronous, and
-deterministic: the same event sequence over the same initial state yields
-identical states and effects on every platform.
+The repository is a **platform-independent browser decision core for agents
+and LLMs** (ADR-019): it resolves commands into deterministic decisions and
+effect *requests* — it owns no OS APIs, no UI, no WebView, no filesystem, no
+networking. Hosts execute; the core decides. Whether the host runs it
+headless or as a full browser is the host's choice — the contract is
+identical. Every layer is pure, synchronous, and deterministic: the same
+event sequence over the same initial state yields identical states and
+effects on every platform.
+
+Because an agent reads state every step, the core provides
+`Workspace::observe_text()` (ADR-019): a deterministic, compact,
+token-efficient projection with per-tab phase-derived action lists — the
+observation is the agent's eyes.
 
 ## Crates
 

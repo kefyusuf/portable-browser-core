@@ -1,9 +1,12 @@
 # Portable Browser Core
 
-A platform-independent browser decision core: deterministic navigation
-resolution, per-tab lifecycle and history, a tab strip with session
-persistence, and a window set — pure and synchronous in Rust, bridged to
-JavaScript via WASM. See [docs/architecture.md](docs/architecture.md) for
+A platform-independent browser decision core for **agents and LLMs**:
+deterministic navigation resolution, per-tab lifecycle and history, a tab
+strip with session persistence, and a window set — pure and synchronous in
+Rust, bridged to JavaScript via WASM. Whether the host runs it headless or
+as a full browser is the host's choice; the core returns decisions and
+effect requests, hosts execute (ADR-004). The agent's eyes are the
+observation text (`observe_text()`, ADR-019). See [docs/architecture.md](docs/architecture.md) for
 the crate map and layer diagram, and [CHANGELOG.md](CHANGELOG.md) for the
 milestone history.
 
