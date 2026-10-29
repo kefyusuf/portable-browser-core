@@ -45,9 +45,14 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           wasm-bindgen --version
-          wasm-bindgen --target nodejs --out-dir crates/browser-core-wasm/pkg target/wasm32-unknown-unknown/debug/browser_core_wasm.wasm
+          wasm-bindgen --target nodejs --out-dir crates/browser-core-wasm/pkg/nodejs target/wasm32-unknown-unknown/debug/browser_core_wasm.wasm
+          wasm-bindgen --target bundler --out-dir crates/browser-core-wasm/pkg/bundler target/wasm32-unknown-unknown/debug/browser_core_wasm.wasm
+          wasm-bindgen --target web --out-dir crates/browser-core-wasm/pkg/web target/wasm32-unknown-unknown/debug/browser_core_wasm.wasm
           cp crates/browser-core-wasm/npm/package.json crates/browser-core-wasm/pkg/package.json
-          ls crates/browser-core-wasm/pkg
+          ls -R crates/browser-core-wasm/pkg
+      - name: Verify multi-target package structure
+        if: matrix.os == 'ubuntu-latest'
+        run: node crates/browser-core-wasm/tests/verify-targets.cjs
       - name: npm package smoke test (Node)
         if: matrix.os == 'ubuntu-latest'
         run: node crates/browser-core-wasm/tests/smoke.cjs
