@@ -2,12 +2,19 @@
   "name": "portable-browser-core",
   "version": "0.1.0",
   "description": "Platform-independent browser decision core: deterministic navigation resolution, tab lifecycle, session history, and window sets (WASM bridge)",
-  "main": "browser_core_wasm.js",
-  "types": "browser_core_wasm.d.ts",
+  "main": "nodejs/browser_core_wasm.js",
+  "types": "nodejs/browser_core_wasm.d.ts",
+  "exports": {
+    ".": {
+      "node": "./nodejs/browser_core_wasm.js",
+      "bundler": "./bundler/browser_core_wasm.js",
+      "default": "./web/browser_core_wasm.js"
+    }
+  },
   "files": [
-    "browser_core_wasm_bg.wasm",
-    "browser_core_wasm.js",
-    "browser_core_wasm.d.ts"
+    "nodejs/",
+    "bundler/",
+    "web/"
   ],
   "license": "UNLICENSED",
   "private": true,

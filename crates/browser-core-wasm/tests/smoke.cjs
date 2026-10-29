@@ -3,7 +3,7 @@
 // exits non-zero on any mismatch. The JS surface uses the Rust names
 // verbatim (snake_case); camelCase aliasing is a later decision.
 const assert = require('node:assert');
-const { resolve_navigation, WorkspaceBinding } = require('../pkg/browser_core_wasm.js');
+const { resolve_navigation, WorkspaceBinding } = require('../pkg/nodejs/browser_core_wasm.js');
 
 // Navigation classification, all three kinds.
 const url = resolve_navigation('example.com');
