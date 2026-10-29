@@ -21,6 +21,18 @@ fn parse_workspace_event(event: &str, arg: &str, row: usize) -> WorkspaceEvent {
                 .unwrap_or_else(|_| panic!("bad close_w id at row {row}")),
         );
     }
+    if let Some(rest) = event.strip_prefix("move_w:") {
+        let (id, to_index) = rest
+            .split_once(':')
+            .unwrap_or_else(|| panic!("bad move_w event at row {row}"));
+        return WorkspaceEvent::MoveWindow(
+            id.parse()
+                .unwrap_or_else(|_| panic!("bad move_w id at row {row}")),
+            to_index
+                .parse()
+                .unwrap_or_else(|_| panic!("bad move_w index at row {row}")),
+        );
+    }
     if let Some(id) = event.strip_prefix("activate_w:") {
         return WorkspaceEvent::ActivateWindow(
             id.parse()
@@ -151,10 +163,13 @@ fn assert_noop(outcome: &WorkspaceOutcome, cell: &str, row: usize) {
     let expected = match cell {
         "-" => None,
         reason => {
-            let known = [WorkspaceNoOpReason::UnknownWindow]
-                .into_iter()
-                .find(|known| known.as_str() == reason)
-                .unwrap_or_else(|| panic!("unknown noop reason {reason:?} at row {row}"));
+            let known = [
+                WorkspaceNoOpReason::UnknownWindow,
+                WorkspaceNoOpReason::IndexOutOfRange,
+            ]
+            .into_iter()
+            .find(|known| known.as_str() == reason)
+            .unwrap_or_else(|| panic!("unknown noop reason {reason:?} at row {row}"));
             Some(known)
         }
     };
@@ -203,8 +218,8 @@ fn workspace_golden_matrix() {
         checked += 1;
     }
 
-    assert_eq!(scenario_count, 4, "M7 fixture scenario count drift");
-    assert_eq!(checked, 19, "M7 fixture row count drift");
+    assert_eq!(scenario_count, 6, "fixture scenario count drift");
+    assert_eq!(checked, 32, "fixture row count drift");
 }
 
 #[test]
@@ -259,6 +274,23 @@ fn workspace_can_become_empty_and_recover() {
     assert!(outcome.view.windows.is_empty());
     let outcome = workspace.handle(WorkspaceEvent::NewWindow);
     assert_eq!(outcome.view.active_window_id, Some(2));
+}
+
+#[test]
+fn moving_active_window_keeps_activation() {
+    let mut workspace = Workspace::new();
+    for _ in 0..3 {
+        workspace.handle(WorkspaceEvent::NewWindow);
+    }
+    workspace.handle(WorkspaceEvent::ActivateWindow(2));
+    let outcome = workspace.handle(WorkspaceEvent::MoveWindow(2, 0));
+    // Activation follows the id, not the position.
+    assert_eq!(outcome.view.active_window_id, Some(2));
+    let first = outcome.view.windows.first().expect("strip not empty");
+    assert_eq!(first.id, 2);
+    assert!(first.is_active);
+    let ids: Vec<u64> = outcome.view.windows.iter().map(|w| w.id).collect();
+    assert_eq!(ids, vec![2, 1, 3]);
 }
 
 #[test]

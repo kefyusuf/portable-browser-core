@@ -19,6 +19,10 @@ pub enum WorkspaceEvent {
     ActivateWindow(u64),
     /// Delegate a container event to the addressed window's container.
     Container(u64, ContainerEvent),
+    /// Reposition the addressed window so it sits at the target index
+    /// (0-based) afterwards. Ids, containers, and their states are
+    /// untouched (ADR-018).
+    MoveWindow(u64, usize),
 }
 
 /// Why a workspace event produced no transition. The workspace is total:
@@ -27,12 +31,15 @@ pub enum WorkspaceEvent {
 pub enum WorkspaceNoOpReason {
     /// No window with the addressed id exists.
     UnknownWindow,
+    /// The requested workspace position does not exist; the core never clamps.
+    IndexOutOfRange,
 }
 
 impl WorkspaceNoOpReason {
     pub const fn as_str(self) -> &'static str {
         match self {
             Self::UnknownWindow => "unknown_window",
+            Self::IndexOutOfRange => "index_out_of_range",
         }
     }
 }
@@ -137,6 +144,7 @@ impl Workspace {
             WorkspaceEvent::CloseWindow(id) => self.close_window(id),
             WorkspaceEvent::ActivateWindow(id) => self.activate_window(id),
             WorkspaceEvent::Container(id, container_event) => self.route(id, container_event),
+            WorkspaceEvent::MoveWindow(id, to_index) => self.move_window(id, to_index),
         }
     }
 
@@ -219,6 +227,30 @@ impl Workspace {
             .map_err(|_| WorkspaceSessionError::MalformedSession)?;
         self.windows[index].container = container;
         Ok(())
+    }
+
+    fn move_window(&mut self, id: u64, to_index: usize) -> WorkspaceOutcome {
+        let Some(from) = self.window_index(id) else {
+            return self.finish(
+                TabEffect::None,
+                None,
+                Some(WorkspaceNoOpReason::UnknownWindow),
+            );
+        };
+        if to_index >= self.windows.len() {
+            return self.finish(
+                TabEffect::None,
+                None,
+                Some(WorkspaceNoOpReason::IndexOutOfRange),
+            );
+        }
+        if from != to_index {
+            // Position is the only thing that changes: identity, containers,
+            // and their states move with the slot; activation follows the id.
+            let slot = self.windows.remove(from);
+            self.windows.insert(to_index, slot);
+        }
+        self.finish(TabEffect::None, None, None)
     }
 
     fn window_index(&self, id: u64) -> Option<usize> {
