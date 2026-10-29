@@ -1,6 +1,6 @@
 # ADR-018 — M15 window reordering
 
-**Status:** Semantics accepted 2026-10-27 (maintainer go-ahead on the candidate list); implemented on `feat/m15-window-reorder`. Milestone evidence (multi-platform CI and independent acceptance) pending.
+**Status:** Accepted and merged 2026-10-29 (PR #15, accepted head `4afe22d`, CI run 40918583857). See the M15 milestone for the evidence index.
 
 ## Context
 

@@ -1,6 +1,6 @@
 # M15 — Window reordering
 
-**State: IMPLEMENTING** — ADR-018 accepted 2026-10-27; implementation on the branch, CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-29.
 
 ## Deliverable
 
@@ -13,8 +13,8 @@
 - [x] The ADR-006 close-activation policy (and the ADR-007 close-after-reorder rule) continue to operate on current positions after a workspace reorder.
 - [x] Events addressing a nonexistent window are no-ops (`unknown_window`); out-of-range target indexes are no-ops (`index_out_of_range`); moving a window to its current index is a valid no-transition.
 - [x] Golden workspace scenarios extend with reordering rows and exact-count drift guards (6 scenarios / 32 steps).
-- [ ] Multi-platform CI green bound to the final exact PR head (3-OS Rust + Ubuntu cdylib build + Node binding tests).
-- [ ] Independent acceptance of ADR-018 semantics for the final exact HEAD.
+- [x] Multi-platform CI green bound to the final exact PR head (3-OS Rust + Ubuntu cdylib build + Node binding tests). *(Core CI run [40918583857](https://github.com/kefyusuf/portable-browser-core/actions/runs/40918583857) PASS on head `4afe22d`.)*
+- [x] Independent acceptance of ADR-018 semantics for the final exact HEAD. *(Maintainer accepted 2026-10-29 by approving the merge of PR #15. Semantics acceptance recorded 2026-10-27 in the design round; the local Windows verification record is in the PR evidence comment.)*
 
 ## Baseline/provenance
 
