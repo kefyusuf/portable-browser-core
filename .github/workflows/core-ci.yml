@@ -41,3 +41,13 @@ jobs:
         run: |
           cargo +1.98.1 install wasm-bindgen-cli --version 0.2.129 --locked
           CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUNNER=wasm-bindgen-test-runner cargo +1.98.1 test -p browser-core-wasm --locked --target wasm32-unknown-unknown
+      - name: Assemble npm package
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          wasm-bindgen --version
+          wasm-bindgen --target nodejs --out-dir crates/browser-core-wasm/pkg target/wasm32-unknown-unknown/debug/browser_core_wasm.wasm
+          cp crates/browser-core-wasm/npm/package.json crates/browser-core-wasm/pkg/package.json
+          ls crates/browser-core-wasm/pkg
+      - name: npm package smoke test (Node)
+        if: matrix.os == 'ubuntu-latest'
+        run: node crates/browser-core-wasm/tests/smoke.cjs
