@@ -49,5 +49,6 @@ The a–e roadmap is complete. No further milestone is predefined; the next scop
 - **M12:** Per-entry favicons — **DONE** (accepted and merged 2026-10-27; PR #12, head `62f0cbf`).
 - **M13:** npm packaging (preparation) — **DONE** (accepted and merged 2026-10-27; PR #13, head `c45be01`).
 - **M14:** Browser target outputs — **DONE** (accepted and merged 2026-10-27; PR #14, head `df83d62`).
+- **M15:** Window reordering — **IN REVIEW**: implementation on [PR #15](https://github.com/kefyusuf/portable-browser-core/pull/15) ([milestone](docs/milestones/M15-window-reordering.md), [ADR-018](docs/decisions/ADR-018-window-reordering.md)).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.
