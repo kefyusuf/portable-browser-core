@@ -72,5 +72,6 @@ The a–e roadmap is complete. No further milestone is predefined; the next scop
 - **M16:** Documentation consolidation — **DONE** (accepted and merged 2026-10-29; PR #16, head `c642b29`).
 - **M17:** Agentic purpose and observation text — **DONE** (accepted and merged 2026-10-29; PR #17, head `e9afe27`).
 - **M18:** Agent loop example — **DONE** (accepted and merged 2026-10-31; PR #18, head `faa4b0e`).
+- **M19:** License and WebView integration guide — **DONE** (accepted and merged 2026-10-31; PR #19, head `03bed58`).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.
