@@ -24,6 +24,17 @@ milestone history.
 
 The result is exactly one of `Url(String)`, `Search(String)`, or `Rejection(RejectionReason)`. URL resolution **does not load or navigate** to the URL. Search resolution returns a query, not a search-engine URL.
 
+## WebView integration
+
+Using the core as the decision layer of a headless or WebView-based host —
+the observe → decide → act → execute loop, engine callback mapping, and
+session restore — is documented in
+[docs/webview-integration.md](docs/webview-integration.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
 ## Verify
 
 Requires Rust 1.98.1. From repository root:

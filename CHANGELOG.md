@@ -4,6 +4,13 @@ All notable changes to the portable browser decision core. Milestone evidence
 (PR number, accepted head, CI run) is recorded per entry and in each
 milestone document under `docs/milestones/`.
 
+## M19 — License and WebView integration guide (2026-10-31)
+
+MIT license adopted (`LICENSE`, crate manifests, npm manifest) and a WebView
+integration guide added (`docs/webview-integration.md`): the observe →
+decide → act → execute loop, engine callback mapping, and session restore.
+(M19, no ADR — no semantics.)
+
 ## M17 — Agentic purpose and the observation text (2026-10-29)
 
 The project purpose becomes first-class: the core is the browser decision
