@@ -1,6 +1,6 @@
 # M18 — Agent loop example
 
-**State: IMPLEMENTING** — docs-by-code under the clarified purpose (ADR-019); no semantics, no ADR required (M16 precedent). Example verified locally against the assembled package; CI and independent acceptance pending.
+**State: DONE** — accepted and merged 2026-10-31.
 
 ## Deliverable
 
@@ -13,8 +13,8 @@ A checked-in, deterministic Node example (`examples/agent-loop.cjs`) demonstrati
 - [x] Every effect is printed as a **request** ("host would execute") — the ADR-004 boundary is demonstrated, not blurred. No network, no engine, no prompt templates.
 - [x] The example is deterministic and asserts its key expectations (exits non-zero on any mismatch), so CI can run it as evidence.
 - [x] CI runs the example after the package assembly step.
-- [ ] Multi-platform CI green bound to the final exact PR head (existing gates unchanged).
-- [ ] Independent acceptance for the final exact HEAD.
+- [x] Multi-platform CI green bound to the final exact PR head (existing gates unchanged). *(Core CI run [41078702564](https://github.com/kefyusuf/portable-browser-core/actions/runs/41078702564) PASS on head `faa4b0e`; Agent loop example (Node) step success.)*
+- [x] Independent acceptance for the final exact HEAD. *(Maintainer accepted 2026-10-31 by approving the merge of PR #18. The local Windows verification record — including a local example run — is in the PR evidence comment.)*
 
 ## Baseline/provenance
 

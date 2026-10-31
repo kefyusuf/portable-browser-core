@@ -60,6 +60,6 @@ The a–e roadmap is complete. No further milestone is predefined; the next scop
 - **M15:** Window reordering — **DONE** (accepted and merged 2026-10-29; PR #15, head `4afe22d`).
 - **M16:** Documentation consolidation — **DONE** (accepted and merged 2026-10-29; PR #16, head `c642b29`).
 - **M17:** Agentic purpose and observation text — **DONE** (accepted and merged 2026-10-29; PR #17, head `e9afe27`).
-- **M18:** Agent loop example — **IN REVIEW**: the intended integration pattern as a checked-in, CI-run example on [PR #18](https://github.com/kefyusuf/portable-browser-core/pull/18) ([milestone](docs/milestones/M18-agent-loop-example.md)).
+- **M18:** Agent loop example — **DONE** (accepted and merged 2026-10-31; PR #18, head `faa4b0e`).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.
