@@ -56,3 +56,6 @@ jobs:
       - name: npm package smoke test (Node)
         if: matrix.os == 'ubuntu-latest'
         run: node crates/browser-core-wasm/tests/smoke.cjs
+      - name: Agent loop example (Node)
+        if: matrix.os == 'ubuntu-latest'
+        run: node examples/agent-loop.cjs
