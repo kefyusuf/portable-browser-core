@@ -85,3 +85,27 @@ jobs:
         run: cargo +1.98.1 install cargo-deny --locked
       - name: Check
         run: cargo +1.98.1 deny check
+
+  cargo-fuzz:
+    name: Cargo fuzz (bounded campaign)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - name: Install pinned nightly
+        run: rustup toolchain install nightly-2026-11-10 --profile minimal
+      - name: Cache cargo state
+        uses: Swatinem/rust-cache@e9d7b9f1e587218970671bac74e5511ed9506e6a # v2
+        with:
+          cache-all-crates: true
+      - name: Install cargo-fuzz
+        run: cargo +nightly-2026-11-10 install cargo-fuzz --locked
+      - name: Build fuzz targets
+        run: cargo +nightly-2026-11-10 fuzz build
+      - name: Campaign — resolve_navigation (60s)
+        run: cargo +nightly-2026-11-10 fuzz run resolve_navigation -- -max_total_time=60
+      - name: Campaign — from_session_text (60s)
+        run: cargo +nightly-2026-11-10 fuzz run from_session_text -- -max_total_time=60
+      - name: Campaign — from_workspace_text (60s)
+        run: cargo +nightly-2026-11-10 fuzz run from_workspace_text -- -max_total_time=60
