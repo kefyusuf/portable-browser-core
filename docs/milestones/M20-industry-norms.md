@@ -1,6 +1,6 @@
 # M20 — Industry-norm alignment
 
-**State: PROPOSED** — PR #20 (2026-11-16).
+**State: DONE** — accepted and merged 2026-11-16 (PR #20, accepted head `8ef1b89`, merge `e5b18db`; CI run 43922412304 on the exact head; main CI green at the merge, run 43933383432).
 
 ## Deliverable
 
@@ -32,17 +32,27 @@ milestone closes the mechanical gaps without touching accepted semantics:
 
 ## Acceptance criteria
 
-- [ ] No accepted semantics change: core behavior identical; the
+- [x] No accepted semantics change: core behavior identical; the
       `--locked` commands pass unchanged after the workspace-inheritance
-      refactor (no lockfile change).
-- [ ] `cargo deny check` passes locally and in CI on the exact head.
-- [ ] CI green (3-OS matrix + cargo-deny job) on the exact PR head.
-- [ ] The assembled package passes `verify-targets.cjs` and the Node smoke
+      refactor (no lockfile change). *(Verified locally and in CI.)*
+- [x] `cargo deny check` passes locally and in CI on the exact head.
+      *(Local run + the dedicated `cargo-deny` job, 2m22s.)*
+- [x] CI green (3-OS matrix + cargo-deny job) on the exact PR head.
+      *(Core CI run [43922412304](https://github.com/kefyusuf/portable-browser-core/actions/runs/43922412304) PASS on head `8ef1b89`.)*
+- [x] The assembled package passes `verify-targets.cjs` and the Node smoke
       test with the nested-`types` exports map.
-- [ ] Community files present; `SECURITY.md` points at private
-      vulnerability reporting only.
-- [ ] CHANGELOG head hashes verified against git history for every M1–M19
-      entry; the M18 entry present.
+- [x] Community files present; `SECURITY.md` points at private
+      vulnerability reporting only. *(Maintainer must still enable
+      Private vulnerability reporting in repo Settings for the channel to
+      be live.)*
+- [x] CHANGELOG head hashes verified against git history for every M1–M19
+      entry; the M18 entry present. *(18/18 hashes verified as ancestors
+      of their PR merge commits.)*
+
+Independent acceptance for the final exact HEAD. *(Maintainer accepted
+2026-11-16 by approving the merge of PR #20. The local Windows
+verification record is in the PR evidence comment,
+issuecomment-6924512552.)*
 
 ## Baseline/provenance
 

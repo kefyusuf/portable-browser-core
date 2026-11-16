@@ -10,7 +10,7 @@ observation text (`observe_text()`, ADR-019). See [docs/architecture.md](docs/ar
 the crate map and layer diagram, and [CHANGELOG.md](CHANGELOG.md) for the
 milestone history.
 
-**Status:** M1–M19 **DONE** — the in-repo milestone sequence (navigation core → tab machine → tab strip → sessions → window set → JS bridge → packaging → docs → agentic observation → license) is accepted, merged, and CI-verified. Per-milestone evidence lives in each milestone document and its PR; next scopes (WebView adapter, publishing) await maintainer decisions.
+**Status:** M1–M20 **DONE** — the in-repo milestone sequence (navigation core → tab machine → tab strip → sessions → window set → JS bridge → packaging → docs → agentic observation → license → industry-norm alignment) is accepted, merged, and CI-verified. Per-milestone evidence lives in each milestone document and its PR; next scopes (fuzz targets — proposed, WebView adapter, publishing) await maintainer decisions.
 
 ## Frozen boundary
 
@@ -74,6 +74,7 @@ The a–e roadmap is complete. No further milestone is predefined; the next scop
 - **M17:** Agentic purpose and observation text — **DONE** (accepted and merged 2026-10-29; PR #17, head `e9afe27`).
 - **M18:** Agent loop example — **DONE** (accepted and merged 2026-10-31; PR #18, head `faa4b0e`).
 - **M19:** License and WebView integration guide — **DONE** (accepted and merged 2026-10-31; PR #19, head `03bed58`).
-- **M20:** Industry-norm alignment (community files, supply-chain CI, workspace inheritance, packaging manifest norms) — **PROPOSED** (PR #20).
+- **M20:** Industry-norm alignment (community files, supply-chain CI, workspace inheritance, packaging manifest norms) — **DONE** (accepted and merged 2026-11-16; PR #20, head `8ef1b89`).
+- **M21:** Fuzz targets (cargo-fuzz over the three text surfaces) — **PROPOSED**.
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.

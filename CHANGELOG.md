@@ -12,7 +12,7 @@ check`, SHA-pinned actions, `rust-cache`, workflow concurrency, Dependabot),
 workspace manifest inheritance, the exact-pinned `wasm-bindgen-test`, and
 the nested-`types` npm exports map (ADR-020 records the dependency pinning
 policy). Evidence hygiene: CHANGELOG head hashes corrected (M6/M7/M8) and
-the missing M18 entry added. (M20, ADR-020.)
+the missing M18 entry added. (PR #20, head `8ef1b89`, ADR-020.)
 
 ## M19 — License and WebView integration guide (2026-10-31)
 
