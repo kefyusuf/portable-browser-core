@@ -250,7 +250,11 @@ impl TabContainer {
             return self.finish(TabEffect::None, None, Some(ContainerNoOpReason::UnknownTab));
         };
         if let Some(title) = &title {
-            if title.bytes().any(|byte| byte.is_ascii_control()) {
+            // ADR-022: an empty title is not a title — format v2 cannot
+            // express it (an empty segment reads as `None`), so admitting
+            // one would break save → restore (M21 fuzz finding). The same
+            // reasoned-no-op class as control bytes.
+            if title.is_empty() || title.bytes().any(|byte| byte.is_ascii_control()) {
                 return self.finish(
                     TabEffect::None,
                     None,
@@ -274,7 +278,9 @@ impl TabContainer {
             return self.finish(TabEffect::None, None, Some(ContainerNoOpReason::UnknownTab));
         };
         if let Some(favicon) = &favicon {
-            if favicon.bytes().any(|byte| byte.is_ascii_control()) {
+            // ADR-022, mirroring the title rule: an empty favicon is not a
+            // favicon — format v2 cannot express it.
+            if favicon.is_empty() || favicon.bytes().any(|byte| byte.is_ascii_control()) {
                 return self.finish(
                     TabEffect::None,
                     None,
@@ -406,6 +412,12 @@ fn parse_v1_title_field(field: &str) -> Result<Option<String>, SessionParseError
         "-" => Ok(None),
         rest => {
             let escaped = rest.strip_prefix("t:").ok_or(SessionParseError)?.to_owned();
+            // ADR-022: an empty legacy payload reads as absent — the same
+            // rule every optional segment follows (M21 fuzz finding: a
+            // `Some("")` title cannot round-trip through format v2).
+            if escaped.is_empty() {
+                return Ok(None);
+            }
             Ok(Some(unescape_field(&escaped).ok_or(SessionParseError)?))
         }
     }
