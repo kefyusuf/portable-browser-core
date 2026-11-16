@@ -1,10 +1,10 @@
 [package]
 name = "browser-core"
-version = "0.1.0"
-edition = "2021"
-rust-version = "1.98"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 description = "Pure deterministic navigation decision core"
-license = "MIT"
+license.workspace = true
 publish = false
 
 [dependencies]

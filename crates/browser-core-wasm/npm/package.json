@@ -6,9 +6,18 @@
   "types": "nodejs/browser_core_wasm.d.ts",
   "exports": {
     ".": {
-      "node": "./nodejs/browser_core_wasm.js",
-      "bundler": "./bundler/browser_core_wasm.js",
-      "default": "./web/browser_core_wasm.js"
+      "node": {
+        "types": "./nodejs/browser_core_wasm.d.ts",
+        "default": "./nodejs/browser_core_wasm.js"
+      },
+      "bundler": {
+        "types": "./bundler/browser_core_wasm.d.ts",
+        "default": "./bundler/browser_core_wasm.js"
+      },
+      "default": {
+        "types": "./web/browser_core_wasm.d.ts",
+        "default": "./web/browser_core_wasm.js"
+      }
     }
   },
   "files": [
@@ -17,9 +26,21 @@
     "web/"
   ],
   "license": "MIT",
+  "keywords": [
+    "wasm",
+    "browser",
+    "tab",
+    "navigation",
+    "agent",
+    "llm"
+  ],
   "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/kefyusuf/portable-browser-core"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/kefyusuf/portable-browser-core/issues"
+  },
+  "homepage": "https://github.com/kefyusuf/portable-browser-core#readme"
 }
