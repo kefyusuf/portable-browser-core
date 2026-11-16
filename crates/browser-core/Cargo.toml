@@ -8,4 +8,4 @@ license.workspace = true
 publish = false
 
 [dependencies]
-url = "=2.5.4"
+url = "=2.5.8"
