@@ -4,6 +4,17 @@ All notable changes to the portable browser decision core. Milestone evidence
 (PR number, accepted head, CI run) is recorded per entry and in each
 milestone document under `docs/milestones/`.
 
+## M21 — Fuzz targets (2026-11-16)
+
+Coverage-guided fuzzing (cargo-fuzz, ADR-021) over the core's three text
+surfaces with totality and canonical round-trip oracles, golden-fixture
+seeds, and a bounded ubuntu CI campaign under a pinned nightly. The first
+campaigns triaged two findings: the parsers pre-allocated from untrusted
+header counts (an allocation abort on hostile input — fixed: hint removed,
+rejection cases pinned) and the session format cannot represent an empty
+title (save → restore drops `Some("")` — ruled empty ≡ absent in M22,
+ADR-022). (M21, ADR-021.)
+
 ## M22 — Empty title/favicon ruling (2026-11-16)
 
 The semantics ruling resolving the M21 fuzz gate's second finding

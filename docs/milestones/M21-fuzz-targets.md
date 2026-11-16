@@ -45,6 +45,30 @@ same evidence-gate precedent as the wasm steps).
 - [ ] CI green (3-OS matrix + cargo-deny + cargo-fuzz jobs) on the exact
       PR head, with the fuzz job's campaign log as evidence.
 
+## Triage (first campaigns, runs 43934990697 / 43936926830)
+
+Two findings from the first bounded campaigns — both minimized and
+root-caused; the gate worked as designed:
+
+1. **Allocation abort from untrusted header counts** (both parsers).
+   `Vec::with_capacity(tab_count / window_count)` trusted the declared
+   count; a hostile header (e.g. `header\t67440737191031\t…`) aborted with
+   allocation-size-too-big — a totality violation. **Fixed in this
+   milestone:** the pre-allocation hint is removed (memory stays
+   proportional to the input; the existing count checks keep validation
+   total); hostile-count rejection cases pinned in both golden test
+   files. Semantics-neutral — no accepted decision changes.
+2. **The session format cannot represent an empty title.**
+   `SetTitle("")` is a valid event (only control bytes are rejected), but
+   format v2 reads an empty segment as `None` — so a live state with
+   `title: Some("")` saves as `url~` and restores as `title: None`. The
+   v1 parser reaches the same state through an empty `t:` payload
+   (minimized input: `tab\t1\tt:\t0\t-\thttps://a.test/`). A round-trip
+   break over event-reachable states: a semantics ruling is required
+   (empty ≡ absent everywhere, event-layer rejection, or a format
+   change). **Pending maintainer decision** — the session campaign stays
+   red until it lands.
+
 ## Baseline/provenance
 
 Derived from the 2026-11-16 industry-norm review (P3: parser surfaces
