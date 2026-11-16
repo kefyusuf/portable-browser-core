@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/kefyusuf/portable-browser-core/security/advisories/new
+    about: Report vulnerabilities privately (see SECURITY.md) — do not open a public issue.

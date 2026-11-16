@@ -1,0 +1,29 @@
+name: Bug report
+description: A deterministic behavior deviates from its documented acceptance
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Bugs here are deviations from accepted, documented semantics — check the relevant ADR and milestone document first.
+  - type: input
+    id: surface
+    attributes:
+      label: Affected surface
+      description: e.g. resolve_navigation, TabContainer::from_session_text, Workspace::from_workspace_text, WorkspaceBinding, observe_text
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Exact input and expected vs. actual output. Determinism means the same input must always produce the same result.
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Exact commit / CI run
+      description: The head SHA (or CI run link) the behavior was observed on.
+    validations:
+      required: true
