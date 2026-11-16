@@ -1,0 +1,59 @@
+# M21 — Fuzz targets
+
+**State: PROPOSED** (2026-11-16) — awaiting maintainer semantics/scope acceptance before implementation.
+
+## Deliverable
+
+Coverage-guided fuzzing over the core's text-input surfaces, proving the
+totality contract ("parsing accepts or reasons, never panics") against
+arbitrary host-provided text — the deferred P3 finding of the 2026-11-16
+industry-norm review and an explicit item in the M20 stop boundary.
+
+Three text surfaces take untrusted input (see SECURITY.md scope):
+
+1. `resolve_navigation(&str)` — address-bar classification (ADR-004)
+2. `TabContainer::from_session_text(&str)` — session format v2, escaping
+   and structural validation (ADR-009, ADR-014, ADR-015)
+3. `Workspace::from_workspace_text(&str)` — envelope embedding container
+   sessions verbatim (ADR-012)
+
+For each surface a fuzz harness asserts **no panic, no hang, no unbounded
+growth**. For surfaces 2–3, accepted inputs additionally feed a
+round-trip oracle: `to_text(from_text(x))` re-parses to an equivalent
+state, and `observe_text()` renders without panicking. Any round-trip
+instability found is triaged as a finding, not silently accepted — the
+oracles test the documented contract, they do not add semantics.
+
+Tooling: `cargo-fuzz` (libFuzzer backend) under a `fuzz/` crate kept
+**outside** the workspace, so the shipped crates' `Cargo.lock` is
+untouched; the nightly toolchain is pinned by date (ADR-020 spirit);
+golden TSV fixtures seed the corpus; CI runs a bounded campaign
+(ubuntu-only — `cargo-fuzz` does not support the local Windows host, the
+same evidence-gate precedent as the wasm steps).
+
+## Acceptance criteria
+
+- [ ] `fuzz/` targets for all three surfaces compile and run under the
+      pinned nightly on ubuntu CI.
+- [ ] A bounded campaign (≥ 60 s per target) is crash-free on the exact
+      head; any finding is triaged before the milestone can be marked
+      done.
+- [ ] Golden fixtures wired as corpus seeds; seeds checked in, campaign
+      artifacts git-ignored.
+- [ ] All pre-existing gates green; accepted semantics unchanged; the
+      main workspace's `Cargo.lock` unchanged.
+- [ ] CI green (3-OS matrix + cargo-deny + cargo-fuzz jobs) on the exact
+      PR head, with the fuzz job's campaign log as evidence.
+
+## Baseline/provenance
+
+Derived from the 2026-11-16 industry-norm review (P3: parser surfaces
+without fuzzing) and the M20 stop boundary. No prior archive; no
+semantics change is proposed — fuzzing is test infrastructure.
+
+## Stop boundary
+
+No change to accepted semantics, no new runtime dependencies, no public
+API change (harnesses are `#[cfg(fuzzing)]`-gated inside `fuzz/`), no
+OSS-Fuzz continuous integration, no coverage thresholds, no new decision
+areas.
