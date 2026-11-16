@@ -1,10 +1,10 @@
 [package]
 name = "browser-core-wasm"
-version = "0.1.0"
-edition = "2021"
-rust-version = "1.98"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 description = "Thin, decision-free WASM/JS bridge over the browser decision core"
-license = "MIT"
+license.workspace = true
 publish = false
 
 [lib]
@@ -16,4 +16,7 @@ js-sys = "=0.3.106"
 wasm-bindgen = "=0.2.129"
 
 [dev-dependencies]
-wasm-bindgen-test = "0.3.79"
+# Locked to the wasm-bindgen 0.2.129 pairing (ADR-020): the trio —
+# wasm-bindgen, wasm-bindgen-test, and CI's wasm-bindgen-cli — moves in
+# lockstep (0.2.N ↔ 0.2.N ↔ 0.3.(N-50)).
+wasm-bindgen-test = "=0.3.79"

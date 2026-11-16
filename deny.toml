@@ -1,0 +1,24 @@
+# cargo-deny configuration (M20): the standard supply-chain gate for the
+# workspace — RustSec advisories, license compliance, duplicate-crate
+# detection, and source trust. Policy context: ADR-020.
+[graph]
+all-features = false
+
+[advisories]
+version = 2
+yanked = "deny"
+
+[licenses]
+version = 2
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "Unicode-3.0",
+]
+
+[bans]
+multiple-versions = "warn"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

@@ -65,10 +65,18 @@ for (const [target, files] of Object.entries(targets)) {
   }
 }
 
-// The manifest wires each consumer to the right flavor.
+// The manifest wires each consumer to the right flavor, with a `types`
+// condition inside every export so TypeScript's bundler resolution finds
+// the declarations without the deprecated top-level fallback.
 const manifest = JSON.parse(fs.readFileSync(path.join(pkg, 'package.json'), 'utf8'));
-assert.strictEqual(manifest.exports['.'].node, './nodejs/browser_core_wasm.js');
-assert.strictEqual(manifest.exports['.'].bundler, './bundler/browser_core_wasm.js');
-assert.strictEqual(manifest.exports['.'].default, './web/browser_core_wasm.js');
+for (const [condition, dir] of [
+  ['node', 'nodejs'],
+  ['bundler', 'bundler'],
+  ['default', 'web'],
+]) {
+  const entry = manifest.exports['.'][condition];
+  assert.strictEqual(entry.types, `./${dir}/browser_core_wasm.d.ts`);
+  assert.strictEqual(entry.default, `./${dir}/browser_core_wasm.js`);
+}
 
 console.log('multi-target package structural verification passed');

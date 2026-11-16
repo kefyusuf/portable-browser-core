@@ -10,7 +10,7 @@ observation text (`observe_text()`, ADR-019). See [docs/architecture.md](docs/ar
 the crate map and layer diagram, and [CHANGELOG.md](CHANGELOG.md) for the
 milestone history.
 
-**Status:** M1–M17 **DONE** — the in-repo milestone sequence (navigation core → tab machine → tab strip → sessions → window set → JS bridge → packaging → docs → agentic observation) is accepted, merged, and CI-verified. Per-milestone evidence lives in each milestone document and its PR; next scopes (WebView adapter, license, publishing) await maintainer decisions.
+**Status:** M1–M19 **DONE** — the in-repo milestone sequence (navigation core → tab machine → tab strip → sessions → window set → JS bridge → packaging → docs → agentic observation → license) is accepted, merged, and CI-verified. Per-milestone evidence lives in each milestone document and its PR; next scopes (WebView adapter, publishing) await maintainer decisions.
 
 ## Frozen boundary
 
@@ -43,11 +43,12 @@ Requires Rust 1.98.1. From repository root:
 cargo fmt --all -- --check
 cargo test --workspace --locked
 cargo clippy --workspace --all-targets --locked -- -D warnings
+cargo deny check
 rustup target add wasm32-unknown-unknown
 cargo check --workspace --locked --target wasm32-unknown-unknown
 ```
 
-The Cargo.lock file is checked in. CI uses --locked to reject unrecorded dependency resolution changes. CI must pass on Linux, macOS and Windows, with a WASM-target compile check. See [M1 acceptance](docs/milestones/M1-navigation-core.md).
+The Cargo.lock file is checked in. CI uses --locked to reject unrecorded dependency resolution changes. CI must pass on Linux, macOS and Windows, with a WASM-target compile check, and runs `cargo deny check` (RustSec advisories, licenses, bans, sources) plus the npm assembly and Node smoke tests on Linux. See [M1 acceptance](docs/milestones/M1-navigation-core.md).
 
 ## Milestones
 
@@ -73,5 +74,6 @@ The a–e roadmap is complete. No further milestone is predefined; the next scop
 - **M17:** Agentic purpose and observation text — **DONE** (accepted and merged 2026-10-29; PR #17, head `e9afe27`).
 - **M18:** Agent loop example — **DONE** (accepted and merged 2026-10-31; PR #18, head `faa4b0e`).
 - **M19:** License and WebView integration guide — **DONE** (accepted and merged 2026-10-31; PR #19, head `03bed58`).
+- **M20:** Industry-norm alignment (community files, supply-chain CI, workspace inheritance, packaging manifest norms) — **PROPOSED** (PR #20).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.
