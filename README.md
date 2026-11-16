@@ -75,6 +75,7 @@ The a–e roadmap is complete. No further milestone is predefined; the next scop
 - **M18:** Agent loop example — **DONE** (accepted and merged 2026-10-31; PR #18, head `faa4b0e`).
 - **M19:** License and WebView integration guide — **DONE** (accepted and merged 2026-10-31; PR #19, head `03bed58`).
 - **M20:** Industry-norm alignment (community files, supply-chain CI, workspace inheritance, packaging manifest norms) — **DONE** (accepted and merged 2026-11-16; PR #20, head `8ef1b89`).
-- **M21:** Fuzz targets (cargo-fuzz over the three text surfaces) — **PROPOSED**.
+- **M21:** Fuzz targets (cargo-fuzz over the three text surfaces) — **PROPOSED** (PR #24).
+- **M22:** Empty title/favicon ruling (ADR-022) — **PROPOSED** (PR #25).
 
 The prior locally discussed M0/M1 archive is not mounted here. This change reconstructs the intended behavior from recorded decisions; it does **not** assert binary/hash equivalence with that archive.
