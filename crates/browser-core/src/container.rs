@@ -544,7 +544,11 @@ impl TabContainer {
             value => Some(value.parse().map_err(|_| SessionParseError)?),
         };
 
-        let mut slots = Vec::with_capacity(tab_count);
+        // The header's tab count is untrusted: never pre-allocate from it —
+        // a hostile count aborts with allocation-size-too-big (M21 fuzz
+        // finding). The `slots.len() != tab_count` check below keeps the
+        // validation total; memory stays proportional to the input.
+        let mut slots = Vec::new();
         for line in lines.iter().skip(2) {
             let fields: Vec<&str> = line.split('\t').collect();
             // v1: `tab <id> <title> <cursor> <pending> [entries…]` (≥5);

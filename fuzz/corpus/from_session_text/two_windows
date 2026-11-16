@@ -1,0 +1,5 @@
+browser-core-session	2
+header	3	4	3
+tab	1	0	-	https://a.test/~A
+tab	2	-	fresh:https://b.test/
+tab	3	0	-	https://c.test/

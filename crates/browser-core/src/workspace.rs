@@ -403,7 +403,10 @@ impl Workspace {
             value => Some(value.parse().map_err(|_| WorkspaceParseError)?),
         };
 
-        let mut windows = Vec::with_capacity(window_count);
+        // The header's window count is untrusted: never pre-allocate from it
+        // (M21 fuzz finding — same totality repair as the container parser).
+        // The `cursor != lines.len()` check below stays the gate.
+        let mut windows = Vec::new();
         let mut cursor = 2usize;
         for _ in 0..window_count {
             let line = lines.get(cursor).ok_or(WorkspaceParseError)?;

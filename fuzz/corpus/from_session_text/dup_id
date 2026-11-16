@@ -1,0 +1,4 @@
+browser-core-session	2
+header	2	3	1
+tab	1	0	-	https://a.test/
+tab	1	0	-	https://b.test/

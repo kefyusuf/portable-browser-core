@@ -1,0 +1,41 @@
+[package]
+name = "browser-core-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+# Kept OUTSIDE the workspace on purpose (ADR-021): libfuzzer-sys and the
+# nightly toolchain must never touch the shipped crates' Cargo.lock.
+[dependencies]
+libfuzzer-sys = "=0.4.13"
+
+[dependencies.browser-core]
+path = "../crates/browser-core"
+
+# Fuzz targets mirror the core's text-input surfaces (ADR-021): every
+# harness is a totality oracle — any host-provided text is accepted or
+# reasoned about, never panics — and the session targets add the canonical
+# round-trip oracle over the PartialEq state views.
+[[bin]]
+name = "resolve_navigation"
+path = "fuzz_targets/resolve_navigation.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "from_session_text"
+path = "fuzz_targets/from_session_text.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "from_workspace_text"
+path = "fuzz_targets/from_workspace_text.rs"
+test = false
+doc = false
+bench = false
