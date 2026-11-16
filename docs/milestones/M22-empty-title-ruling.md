@@ -1,6 +1,6 @@
 # M22 — Empty title/favicon ruling (ADR-022)
 
-**State: PROPOSED** — PR #25 (2026-11-16).
+**State: DONE** — accepted and merged 2026-11-16 (PR #25, accepted head `05dbb73`, merge `756dc3f`; CI run 43940915127 on the exact head).
 
 ## Deliverable
 
@@ -28,9 +28,12 @@ including the pending-load path.
       `invalid_favicon`, including during a pending load (pinned test).
 - [x] All pre-existing gates green locally (fmt, 48 tests, clippy, wasm
       check, deny); the ruling changes no other accepted decision.
-- [ ] CI green on the exact PR head.
-- [ ] M21 rebased over this ruling goes green — its session campaign is
-      the standing acceptance for the ruling.
+- [x] CI green on the exact PR head. *(Run 43940915127, 4/4 jobs, on head
+      `05dbb73`.)*
+- [x] M21 rebased over this ruling goes green — its session campaign is
+      the standing acceptance for the ruling. *(Run 43947104997: the
+      campaign that was red precisely because of this finding now passes
+      crash-free — 15.19M session runs.)*
 
 ## Baseline/provenance
 

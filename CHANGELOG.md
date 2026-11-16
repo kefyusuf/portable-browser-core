@@ -13,7 +13,7 @@ campaigns triaged two findings: the parsers pre-allocated from untrusted
 header counts (an allocation abort on hostile input — fixed: hint removed,
 rejection cases pinned) and the session format cannot represent an empty
 title (save → restore drops `Some("")` — ruled empty ≡ absent in M22,
-ADR-022). (M21, ADR-021.)
+ADR-022). (PR #24, head `0e27262`, ADR-021.)
 
 ## M22 — Empty title/favicon ruling (2026-11-16)
 
@@ -22,7 +22,7 @@ The semantics ruling resolving the M21 fuzz gate's second finding
 `SetFavicon("")` become `invalid_title` / `invalid_favicon` reasoned
 no-ops; a v1 `t:` payload that unescapes to empty reads as `None`. Format
 v2 unchanged; the minimized finding is pinned as a round-trip regression.
-(M22, ADR-022.)
+(PR #25, head `05dbb73`, ADR-022.)
 
 ## M20 — Industry-norm alignment (2026-11-16)
 

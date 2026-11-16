@@ -1,6 +1,6 @@
 # M21 — Fuzz targets
 
-**State: PROPOSED** (2026-11-16) — awaiting maintainer semantics/scope acceptance before implementation.
+**State: DONE** — accepted and merged 2026-11-16 (PR #24, accepted head `0e27262`, merge `6f3d289`; standing-acceptance CI run [43947104997](https://github.com/kefyusuf/portable-browser-core/actions/runs/43947104997): all three campaigns crash-free — 1.39M / 15.19M / 14.09M runs — after the M22 ruling landed).
 
 ## Deliverable
 
@@ -33,17 +33,22 @@ same evidence-gate precedent as the wasm steps).
 
 ## Acceptance criteria
 
-- [ ] `fuzz/` targets for all three surfaces compile and run under the
+- [x] `fuzz/` targets for all three surfaces compile and run under the
       pinned nightly on ubuntu CI.
-- [ ] A bounded campaign (≥ 60 s per target) is crash-free on the exact
+- [x] A bounded campaign (≥ 60 s per target) is crash-free on the exact
       head; any finding is triaged before the milestone can be marked
-      done.
-- [ ] Golden fixtures wired as corpus seeds; seeds checked in, campaign
+      done. *(Two findings triaged: the allocation abort fixed in this
+      milestone; the empty-title break ruled in M22 — the red gate in
+      between was the evidence.)*
+- [x] Golden fixtures wired as corpus seeds; seeds checked in, campaign
       artifacts git-ignored.
-- [ ] All pre-existing gates green; accepted semantics unchanged; the
-      main workspace's `Cargo.lock` unchanged.
-- [ ] CI green (3-OS matrix + cargo-deny + cargo-fuzz jobs) on the exact
-      PR head, with the fuzz job's campaign log as evidence.
+- [x] All pre-existing gates green; accepted semantics unchanged; the
+      main workspace's `Cargo.lock` unchanged. *(The shipped lockfile is
+      untouched; the ruling itself rode with M22 per the maintainer's
+      in-session approval.)*
+- [x] CI green (3-OS matrix + cargo-deny + cargo-fuzz jobs) on the exact
+      PR head, with the fuzz job's campaign log as evidence. *(Run
+      43947104997, 5/5 jobs, on head `0e27262`.)*
 
 ## Triage (first campaigns, runs 43934990697 / 43936926830)
 
