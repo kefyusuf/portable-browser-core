@@ -230,7 +230,7 @@ fn workspace_parser_rejects_malformed_sessions() {
         "v1 blocks carry no titles"
     );
 
-    let cases: [(&str, &str); 8] = [
+    let cases: [(&str, &str); 9] = [
         ("bad magic", "browser-core-workspace\t2\nheader\t0\t1\t-\n"),
         ("unknown active window", "browser-core-workspace\t1\nheader\t0\t1\t7\n"),
         (
@@ -256,6 +256,12 @@ fn workspace_parser_rejects_malformed_sessions() {
         (
             "trailing content",
             "browser-core-workspace\t1\nheader\t0\t1\t-\ngarbage\n",
+        ),
+        // M21 fuzz finding: a hostile header count must be reasoned away,
+        // never pre-allocated (same totality repair as the container parser).
+        (
+            "hostile window count",
+            "browser-core-workspace\t1\nheader\t1099511627776\t1\t-\n",
         ),
     ];
     for (label, text) in cases {

@@ -353,7 +353,7 @@ fn parser_rejects_malformed_sessions() {
     let ok = "browser-core-session\t1\nheader\t1\t2\t1\ntab\t1\t-\t0\t-\thttps://a.test/\n";
     assert!(TabContainer::from_session_text(ok).is_ok());
 
-    let cases: [(&str, &str); 8] = [
+    let cases: [(&str, &str); 9] = [
         ("bad magic", "browser-core-session\t3\nheader\t0\t1\t-\n"),
         ("missing header", "browser-core-session\t1\n"),
         (
@@ -379,6 +379,12 @@ fn parser_rejects_malformed_sessions() {
         (
             "trailing content",
             "browser-core-session\t1\nheader\t1\t2\t1\ntab\t1\t-\t0\t-\thttps://a.test/\ngarbage\n",
+        ),
+        // M21 fuzz finding: a hostile header count must be reasoned away,
+        // never pre-allocated (the parser aborted with allocation-size-too-big).
+        (
+            "hostile tab count",
+            "browser-core-session\t2\nheader\t1099511627776\t1\t-\n",
         ),
     ];
     for (label, text) in cases {
