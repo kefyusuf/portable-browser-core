@@ -4,12 +4,30 @@ All notable changes to the portable browser decision core. Milestone evidence
 (PR number, accepted head, CI run) is recorded per entry and in each
 milestone document under `docs/milestones/`.
 
+## M20 — Industry-norm alignment (2026-11-16)
+
+Community-standard files (`SECURITY.md`, `CONTRIBUTING.md`,
+`CODE_OF_CONDUCT.md`, issue/PR templates), supply-chain CI (`cargo deny
+check`, SHA-pinned actions, `rust-cache`, workflow concurrency, Dependabot),
+workspace manifest inheritance, the exact-pinned `wasm-bindgen-test`, and
+the nested-`types` npm exports map (ADR-020 records the dependency pinning
+policy). Evidence hygiene: CHANGELOG head hashes corrected (M6/M7/M8) and
+the missing M18 entry added. (M20, ADR-020.)
+
 ## M19 — License and WebView integration guide (2026-10-31)
 
 MIT license adopted (`LICENSE`, crate manifests, npm manifest) and a WebView
 integration guide added (`docs/webview-integration.md`): the observe →
 decide → act → execute loop, engine callback mapping, and session restore.
 (M19, no ADR — no semantics.)
+
+## M18 — Agent loop example (2026-10-31)
+
+`examples/agent-loop.cjs` — a deterministic Node example over the assembled
+package demonstrating the intended integration pattern: observe → decide →
+act → host effects, with reasoned no-ops shown as tool errors the agent reads
+and adapts to, and the observation text printed after each state change.
+(PR #18, head `faa4b0e`.)
 
 ## M17 — Agentic purpose and the observation text (2026-10-29)
 
@@ -82,20 +100,20 @@ serialized as a thin envelope embedding the M6 container format verbatim.
 over `wasm-bindgen`, total semantics carried across (`{ noop }` results, never
 throws); CI gains a Node-executed wasm-bindgen-test suite and packaging steps.
 First host adapter — extends the core's stop-boundary. (PR #8, head
-`f1b11aa`/M8 design, ADR-011.)
+`fec6208`, ADR-011.)
 
 ## M7 — Window set (2026-10-27)
 
 `Workspace` — an ordered set of containers with deterministic window ids,
 close-activation (right-else-left), and id-addressed routing of container
-events. (PR #7, head `4afe22d`—see also M15, ADR-010.)
+events. (PR #7, head `caa01b9`, ADR-010.)
 
 ## M6 — Session persistence (2026-10-27)
 
 `TabContainer::to_session_text` / `from_session_text` — format v1 with
 escaping and structural validation; `TabSnapshot`/`from_snapshot` expose full
 machine state; `SetTitle` rejects control-byte titles. (PR #6, head
-`f97e108`, ADR-009.)
+`d4dd983`, ADR-009.)
 
 ## M5 — Host-reported tab titles (2026-10-27)
 
