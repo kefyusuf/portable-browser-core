@@ -397,3 +397,51 @@ fn parser_rejects_malformed_sessions() {
     }
     let _ = SessionParseError.as_str();
 }
+
+#[test]
+fn empty_title_and_favicon_are_invalid_events() {
+    // ADR-022: format v2 cannot express an empty title or favicon (an
+    // empty segment reads as `None`), so the events are reasoned no-ops —
+    // admitting them would break save → restore (M21 fuzz finding).
+    let mut container = TabContainer::new();
+    container.handle(ContainerEvent::NewTab(Some("https://a.test/".into())));
+    let outcome = container.handle(ContainerEvent::SetTitle(1, Some("".into())));
+    assert_eq!(outcome.noop, Some(ContainerNoOpReason::InvalidTitle));
+    let outcome = container.handle(ContainerEvent::SetFavicon(1, Some("".into())));
+    assert_eq!(outcome.noop, Some(ContainerNoOpReason::InvalidFavicon));
+    // The pending-load path is guarded identically: the event is rejected
+    // before it can travel into the pending target.
+    container.handle(ContainerEvent::Tab(
+        1,
+        TabEvent::Navigate("https://b.test/".into()),
+    ));
+    let outcome = container.handle(ContainerEvent::SetTitle(1, Some("".into())));
+    assert_eq!(outcome.noop, Some(ContainerNoOpReason::InvalidTitle));
+    let outcome = container.handle(ContainerEvent::SetFavicon(1, Some("".into())));
+    assert_eq!(outcome.noop, Some(ContainerNoOpReason::InvalidFavicon));
+
+    // A live empty title can no longer exist, so the format round-trips
+    // every reachable state.
+    let text = container.to_session_text();
+    let restored = TabContainer::from_session_text(&text).expect("session parses");
+    assert_eq!(restored.state(), container.state());
+}
+
+#[test]
+fn legacy_empty_title_payload_reads_as_absent() {
+    // The minimized M21 fuzz finding: a v1 session whose title field is a
+    // bare `t:` payload used to restore as `Some("")` — a state format v2
+    // cannot re-express. ADR-022: it reads as absent, like every other
+    // empty segment.
+    let text = "browser-core-session\t1\nheader\t1\t2\t1\ntab\t1\tt:\t0\t-\thttps://a.test/\n";
+    let container = TabContainer::from_session_text(text).expect("legacy session parses");
+    let view = container.state();
+    let tab = view.tabs.first().expect("tab exists");
+    assert_eq!(
+        tab.title, None,
+        "an empty legacy title payload reads as absent"
+    );
+    let canonical = container.to_session_text();
+    let reparsed = TabContainer::from_session_text(&canonical).expect("canonical text re-parses");
+    assert_eq!(reparsed.state(), view, "the round-trip is stable");
+}
