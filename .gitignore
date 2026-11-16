@@ -1,3 +1,5 @@
 /target/
 /crates/browser-core-wasm/pkg/
 /.mimosa/
+/fuzz/artifacts/
+/fuzz/coverage/

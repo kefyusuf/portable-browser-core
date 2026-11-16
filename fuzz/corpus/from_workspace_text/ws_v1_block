@@ -1,0 +1,6 @@
+browser-core-workspace	1
+header	1	2	1
+window	1
+browser-core-session	1
+header	1	2	1
+tab	1	t:Old title	0	-	https://a.test/
